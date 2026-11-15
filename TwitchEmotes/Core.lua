@@ -128,10 +128,27 @@ function E:PrepareSetup()
     end
 end
 
-function E:RegisterPack(def)
+local function validAddonName(value)
+    return type(value)=="string" and #value>=1 and #value<=64 and value:match("^[%w_-]+$")~=nil
+end
+
+-- A pack's textures must live in its owner's Media folder; the shipped packs are owned by TwitchEmotes.
+local function textureType(path,owner)
+    if type(path)~="string" then return nil end
+    local prefix="Interface\\AddOns\\"..owner.."\\Media\\"
+    if path:sub(1,#prefix)~=prefix then return nil end
+    return path:sub(#prefix+1):match("^[%w_\\%-]+%.([a-z]+)$")
+end
+
+function E:RegisterPack(def,owner)
+    owner=owner or "TwitchEmotes"
+    assert(validAddonName(owner), "invalid add-on name")
     assert(type(def)=="table" and type(def.id)=="string" and def.id:match("^[%w_-]+$") and #def.id <= 64, "invalid pack id")
     assert(type(def.emotes)=="table", "pack has no emote list")
-    local pack={id=def.id,title=def.title or def.id,provider=def.provider or "",source=def.source or "",priority=number(def.priority,0,-1000,1000),emotes={}}
+    local existing=self.packs[def.id]
+    assert(not existing or existing.owner==owner, "pack id "..def.id.." belongs to another add-on")
+    local pack={id=def.id,title=def.title or def.id,provider=def.provider or "",source=def.source or "",priority=number(def.priority,0,-1000,1000),emotes={},
+        owner=owner,external=owner~="TwitchEmotes"}
     pack.group=def.group or (def.id:match("_global$") and "general") or def.id
     assert(type(pack.group)=="string" and pack.group:match("^[%w_-]+$") and #pack.group<=64,"invalid group id")
     pack.groupTitle=pack.group=="general" and "General" or def.groupTitle or pack.title
@@ -139,8 +156,8 @@ function E:RegisterPack(def)
     for i, raw in ipairs(def.emotes) do
         assert(type(raw)=="table" and validName(raw.name), "invalid emote name in "..def.id)
         assert(not seen[raw.name], "duplicate emote name in "..def.id); seen[raw.name]=true
-        local textureType=type(raw.path)=="string" and raw.path:match("^Interface\\AddOns\\TwitchEmotes\\Media\\[%w_\\%-]+%.([a-z]+)$")
-        assert(textureType=="tga" or textureType=="blp", "invalid texture path")
+        local kind=textureType(raw.path,owner)
+        assert(kind=="tga" or kind=="blp", "invalid texture path")
         local w,h,sw,sh,frames,fps=raw.width,raw.height,raw.sheetWidth,raw.sheetHeight,raw.frames or 1,raw.fps or 0
         local columns,cellWidth=raw.columns or 1,raw.cellWidth or sw
         for _, v in ipairs({w,h,sw,sh,frames,fps,columns,cellWidth}) do assert(type(v)=="number" and v==v and v < math.huge, "invalid texture dimension") end
@@ -207,7 +224,10 @@ function E:RebuildCatalog()
     table.sort(hiddenNames,byName)
     self.catalog,self.names,self.completionNames=catalog,names,completionNames
     self.available,self.hiddenNames=available,hiddenNames
-    for i=#self.db.recent,1,-1 do if not self.known[self.db.recent[i]] then table.remove(self.db.recent,i) end end
+    -- Extension packs register after this add-on loads, so startup defers pruning until every add-on has loaded.
+    if not self.deferPrune then
+        for i=#self.db.recent,1,-1 do if not self.known[self.db.recent[i]] then table.remove(self.db.recent,i) end end
+    end
     self.revision=self.revision+1
     if self.BuildMatcher then self:BuildMatcher() end
 end
@@ -380,3 +400,30 @@ function E:Record(names,kind,messageID)
         end
     end
 end
+
+-- Extension add-ons register packs whose textures live in their own Media folder:
+--   TwitchEmotesAPI.RegisterPack("MyAddon", {id="mypack", title="My channel", emotes={...}})
+-- Declare "## Dependencies: TwitchEmotes" in the extension's TOC so it loads after this add-on.
+function E:RegisterExternalPack(owner,def)
+    assert(validAddonName(owner) and owner~="TwitchEmotes", "invalid add-on name")
+    self:RegisterPack(def,owner)
+    if self.db then
+        -- Only the new pack gets a default: an earlier choice for its group, else enabled, since installing it opts in.
+        if self.db.packs[def.id]==nil then
+            local group,choice=self.packs[def.id].group,nil
+            for _,id in ipairs(self.packOrder) do
+                if self.packs[id].group==group and self.db.packs[id]~=nil then choice=choice or self.db.packs[id] end
+            end
+            if choice==nil then choice=true end
+            self.db.packs[def.id]=choice
+        end
+        self:RebuildCatalog()
+        if self.loggedIn and self.Refresh then self:Refresh() end
+    end
+    return true
+end
+
+_G.TwitchEmotesAPI = {
+    version = 1,
+    RegisterPack = function(owner,def) return E:RegisterExternalPack(owner,def) end,
+}

@@ -74,6 +74,30 @@ whether the active settings still match WoW's saved table. Early WoW Forever bet
 clients never loaded saved addon settings; the live client does, so finishing the
 first-run picker is remembered there as on every other client.
 
+## Extensions
+
+Another add-on can add channel packs without copying this one. Declare
+`## Dependencies: TwitchEmotes` in its TOC so it loads after this add-on, keep its textures under its
+own `Media` folder, and register each pack once while it loads:
+
+```lua
+TwitchEmotesAPI.RegisterPack("MyEmotePack", {
+  id = "mychannel", title = "My Channel", provider = "7TV", priority = 20,
+  emotes = {
+    { name = "KEKW", path = "Interface\\AddOns\\MyEmotePack\\Media\\kekw.blp",
+      width = 64, height = 64, sheetWidth = 64, sheetHeight = 64, frames = 1, fps = 0 },
+  },
+})
+```
+
+The first argument is the extension's folder name. Packs follow the same rules as the shipped ones
+(the generated `Packs/*.lua` files are complete examples), except that every texture path must start
+with `Interface\AddOns\<that folder>\Media\`. An extension cannot reuse a pack ID that this add-on
+or another extension owns. A new extension group starts enabled; turning it off in **Channels** is
+remembered. Recent emotes from extension packs are kept across sessions because startup waits for
+`PLAYER_LOGIN`, after every add-on has loaded, before it drops names no pack provides.
+`TwitchEmotesAPI.version` is `1`.
+
 ## Development
 
 The runtime uses native WoW controls and chat filters. A literal matcher protects

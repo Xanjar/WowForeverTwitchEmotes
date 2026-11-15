@@ -395,5 +395,18 @@ test("a failing first-run picker leaves chat rendering, links and the slash comm
     _,text=w.filters.CHAT_MSG_SAY({},"CHAT_MSG_SAY","KEKW"); assert(text:find("|T",1,true))
 end)
 
+test("an extension that loads after this add-on registers before login and keeps its recent names", function()
+    local E,world=setup({recent={"KCORP","KEKW","Gone"}},{deferLogin=true})
+    equal(#E.db.recent,3)
+    TwitchEmotesAPI.RegisterPack("TwitchEmotes_French",{id="kameto",title="Kameto",group="kamet0",emotes={
+        {name="KCORP",path="Interface\\AddOns\\TwitchEmotes_French\\Media\\kcorp.tga",width=32,height=32,sheetWidth=32,sheetHeight=32,frames=1,fps=0},
+    }})
+    equal(E.db.packs.kameto,true); equal(world.refreshed,nil)
+    world.eventFrame:Fire("PLAYER_LOGIN")
+    equal(table.concat(E.db.recent," "),"KCORP KEKW")
+    world:Chat("KCORP")
+    equal(E:Stats("KCORP").seen,1)
+end)
+
 print(string.format("runtime: %d passed, %d failed",passed,failed))
 os.exit(failed==0 and 0 or 1)

@@ -223,10 +223,15 @@ frame:SetScript("OnEvent",function(_,event,...)
         _G.ForeverEmotesDB=E:InitializeDB(_G.ForeverEmotesDB)
         _G.ForeverEmotesDB._startup=startupSettings
         E:PrepareSetup()
+        -- Extension packs register after this point; recent names they own survive until login.
+        E.deferPrune=true
         E:RebuildCatalog(); clearCache()
         frame:UnregisterEvent("ADDON_LOADED")
     elseif event=="PLAYER_LOGIN" then
         startupSettings[#startupSettings+1]="At login: "..describeSettings(_G.ForeverEmotesDB).."; saved table matches="..tostring(E.db==_G.ForeverEmotesDB)
+        -- Every add-on that loads at startup has loaded, extensions included.
+        E.deferPrune=nil; E.loggedIn=true
+        E:RebuildCatalog()
         login()
     elseif event=="PLAYER_ENTERING_WORLD" then
         frame:UnregisterEvent("PLAYER_ENTERING_WORLD")

@@ -513,5 +513,59 @@ test("every shipped group has a count and static samples of its own", function()
     equal(table.concat(general," "),"Kappa LUL FeelsGoodMan")
 end)
 
+local function external(name, folder, file)
+    return entry(name, "Interface\\AddOns\\" .. (folder or "TwitchEmotes_French") .. "\\Media\\" .. (file or "test.tga"))
+end
+test("extension packs register through the public API with textures from their own folder", function()
+    local E = setup()
+    equal(TwitchEmotesAPI.version, 1)
+    equal(TwitchEmotesAPI.RegisterPack("TwitchEmotes_French", {id="kameto", title="Kameto", priority=20,
+        emotes={external("KEKW", nil, "7tv\\kekw.blp"), external("KCORP")}}), true)
+    equal(E.packs.kameto.owner, "TwitchEmotes_French"); equal(E.packs.kameto.external, true)
+    equal(E.packs.base.owner, "TwitchEmotes"); equal(E.packs.base.external, false)
+    -- Registered after the database exists: the new group starts enabled and joins the catalog at once.
+    equal(E.db.packs.kameto, true); equal(E:GetEmote("KCORP").packID, "kameto"); equal(E:GetEmote("KEKW").packID, "kameto")
+    E:SetPackEnabled("kameto", false); equal(E:GetEmote("KEKW").packID, "base"); equal(E:GetEmote("KCORP"), nil)
+end)
+test("extension packs keep a saved choice to disable them", function()
+    local E = loadEngine(); E:InitializeDB({packs={kameto=false}})
+    TwitchEmotesAPI.RegisterPack("TwitchEmotes_French", {id="kameto", emotes={external("KCORP")}})
+    equal(E.db.packs.kameto, false); equal(E:GetEmote("KCORP"), nil)
+end)
+test("extension textures must stay inside the registering add-on's Media folder", function()
+    local E = setup()
+    local bad = {
+        external("A", "TwitchEmotes"), external("B", "OtherAddon"), external("C", nil, "..\\..\\x.tga"),
+        external("D", nil, "x.tga|t"), external("E", nil, "x.png"), entry("F", "Interface\\AddOns\\TwitchEmotes_French\\x.tga"),
+    }
+    for _, raw in ipairs(bad) do
+        assert(not pcall(TwitchEmotesAPI.RegisterPack, "TwitchEmotes_French", {id="unsafe", emotes={raw}}), raw.path)
+    end
+    -- Shipped packs remain limited to this add-on's folder.
+    assert(not pcall(function() E:RegisterPack({id="unsafe", emotes={external("G")}}) end))
+    equal(E.packs.unsafe, nil)
+end)
+test("extensions cannot use invalid names, this add-on's name or another owner's pack id", function()
+    local E = setup()
+    for _, owner in ipairs({"TwitchEmotes", "", "bad name", "..", "a\\b", 7, string.rep("a", 65)}) do
+        assert(not pcall(TwitchEmotesAPI.RegisterPack, owner, {id="ext", emotes={external("X", type(owner)=="string" and owner or nil)}}))
+    end
+    assert(not pcall(TwitchEmotesAPI.RegisterPack, "TwitchEmotes_French", {id="base", emotes={external("X")}}))
+    equal(E.packs.base.owner, "TwitchEmotes"); equal(E.packs.ext, nil)
+    TwitchEmotesAPI.RegisterPack("TwitchEmotes_French", {id="ext", emotes={external("X")}})
+    assert(not pcall(TwitchEmotesAPI.RegisterPack, "OtherAddon", {id="ext", emotes={external("Y", "OtherAddon")}}))
+    -- The owner may replace its own pack.
+    TwitchEmotesAPI.RegisterPack("TwitchEmotes_French", {id="ext", emotes={external("Z")}})
+    equal(E:GetEmote("Z").packID, "ext"); equal(E:GetEmote("X"), nil)
+end)
+test("deferred pruning keeps recent names until extension packs have registered", function()
+    local E = loadEngine(); E:InitializeDB({recent={"KCORP","Gone"}})
+    E.deferPrune = true; E:RebuildCatalog()
+    equal(#E.db.recent, 2)
+    TwitchEmotesAPI.RegisterPack("TwitchEmotes_French", {id="kameto", emotes={external("KCORP")}})
+    E.deferPrune = nil; E:RebuildCatalog()
+    equal(#E.db.recent, 1); equal(E.db.recent[1], "KCORP")
+end)
+
 print(string.format("core: %d passed, %d failed",passed,failed))
 os.exit(failed==0 and 0 or 1)
