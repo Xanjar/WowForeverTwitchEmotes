@@ -26,7 +26,7 @@ builder = {}
 
 def toc_text(interface, modules=MODULES, title='Twitch Emotes'):
     header = ['## Interface: ' + interface, '## Title: ' + title, '## Author: TheMizeGuy',
-              '## Version: 3.1.0', '## X-License: All Rights Reserved', '## SavedVariables: ForeverEmotesDB', '']
+              '## Version: 3.1.0', '## X-License: Free to fork with credit (see LICENSE)', '## SavedVariables: ForeverEmotesDB', '']
     return '\n'.join(header + list(modules) + ['Packs\\first.lua', ''])
 
 

@@ -169,7 +169,7 @@ def verify_tocs(addon):
             shared = rest
         elif rest != shared:
             raise ValueError(name + ' differs from the other manifests beyond its Interface and Title lines')
-    for directive in ('## Author: TheMizeGuy', '## X-License: All Rights Reserved', '## SavedVariables: ForeverEmotesDB'):
+    for directive in ('## Author: TheMizeGuy', '## X-License: Free to fork with credit (see LICENSE)', '## SavedVariables: ForeverEmotesDB'):
         if directive not in shared:
             raise ValueError('missing TOC metadata: ' + directive)
     return shared

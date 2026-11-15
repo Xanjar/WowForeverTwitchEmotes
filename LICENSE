@@ -1,18 +1,25 @@
-Copyright (c) 2026 TheMizeGuy. All rights reserved.
+Copyright (c) 2026 TheMizeGuy.
 
-This notice applies to the original program code, build tools, and documentation
+This license applies to the original program code, build tools, and documentation
 of Twitch Emotes WoW Forever, to the extent protected by copyright.
 
-You may download, install, run, and modify the addon for your personal use.
-No permission is granted to republish, redistribute, sell, sublicense, or
-incorporate the covered material into another distributed product without
-prior written permission from TheMizeGuy, except as permitted by applicable
-law or the terms of the platform through which the material is provided.
-All other rights are reserved. The source is available for inspection and
-debugging; this is not an open-source license.
+You may use, copy, modify, and distribute the covered material, including
+modified versions (forks), provided that:
+
+1. Every copy and every modified version keeps this license and the copyright
+   notice above.
+2. Every distributed copy and every modified version credits TheMizeGuy as the
+   author of the original, with a link to
+   https://github.com/TheMizeGuy/WowForeverTwitchEmotes, in its README and on
+   any page where it is offered for download.
+3. A modified version says that it has been changed, and does not present
+   itself as the original or as endorsed by TheMizeGuy.
 
 Third-party emote artwork and provider or game trademarks are excluded from
-this notice. Their rights remain with their respective rights holders.
-See ASSET-NOTICES.md and the provider manifests for artwork provenance.
+this license, which grants no rights to them. Their rights remain with their
+respective rights holders. See ASSET-NOTICES.md and the provider manifests for
+artwork provenance.
 
-The addon is provided as is, without warranties, to the extent permitted by law.
+The covered material is provided as is, without warranties, and its author is
+not liable for any claim or damage arising from it, to the extent permitted by
+law.

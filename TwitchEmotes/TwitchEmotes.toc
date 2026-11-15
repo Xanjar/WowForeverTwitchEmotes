@@ -5,7 +5,7 @@
 ## Notes: Animated chat emotes, a visual channel browser, favorites, and name completion.
 ## Version: 3.2.1
 ## Category: Chat & Communication
-## X-License: All Rights Reserved
+## X-License: Free to fork with credit (see LICENSE)
 ## X-Website: https://github.com/TheMizeGuy/WowForeverTwitchEmotes
 ## SavedVariables: ForeverEmotesDB
 

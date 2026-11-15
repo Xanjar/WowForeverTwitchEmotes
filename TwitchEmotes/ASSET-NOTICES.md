@@ -8,9 +8,10 @@ and hashes are recorded in the source repository's assets/twitch-glitch.json.
 The code copyright does not claim ownership of the Twitch logo.
 
 Artwork in Media comes from the named providers and their emote contributors.
-The code copyright and All Rights Reserved license do not claim ownership of
-that artwork. Provider attribution identifies accounts available in the source
-catalogs; it does not independently verify authorship or redistribution rights.
+The code copyright and the code license do not claim ownership of that
+artwork or grant rights to it. Provider attribution identifies accounts
+available in the source catalogs; it does not independently verify authorship
+or redistribution rights.
 
 Each emote carries provider, source-page and available creator metadata. Detailed
 catalog records, conversion metadata and SHA-256 hashes accompany the source

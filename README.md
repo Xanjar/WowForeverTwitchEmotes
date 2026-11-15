@@ -163,6 +163,7 @@ which the client ignores; delete it by hand once the new build works.
 
 ## Rights
 
-Copyright (c) 2026 TheMizeGuy. **All Rights Reserved** for the original code and
-documentation. See [LICENSE](LICENSE) for personal-use permission and restrictions.
+Copyright (c) 2026 TheMizeGuy. The original code and documentation may be used, modified,
+and forked, as long as the fork credits TheMizeGuy and links back to this repository. See
+[LICENSE](LICENSE) for the terms.
 Emote artwork is separate; see [ASSET-NOTICES.md](ASSET-NOTICES.md).
