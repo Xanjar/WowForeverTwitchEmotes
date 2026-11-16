@@ -37,9 +37,9 @@ class CheckInterfaceTest(unittest.TestCase):
         results = check_interface['check'](self.fetcher({p: response(v) for p, v in LIVE.items()}), self.tocs)
         self.assertEqual([ok for ok, _ in results], [True] * 5)
         self.assertEqual(self.urls, [f'https://us.version.battle.net/{p}/versions' for p in LIVE])
-        self.assertIn('wow 12.1.5.70783: interface 120105 OK in TwitchEmotes_Standard.toc, TwitchEmotes_Mainline.toc, TwitchEmotes.toc', results[0][1])
+        self.assertIn('wow 12.1.5.70783: interface 120105 OK in TwitchEmotesFR_Standard.toc, TwitchEmotesFR_Mainline.toc, TwitchEmotesFR.toc', results[0][1])
         self.assertIn('wowf 1.60.1.70755: interface 16001 OK', results[4][1])
-        self.assertIn('TwitchEmotes_Camelot.toc', results[4][1])
+        self.assertIn('TwitchEmotesFR_Camelot.toc', results[4][1])
 
     def test_a_client_patch_names_every_stale_manifest(self):
         versions = {p: response(v) for p, v in LIVE.items()}
@@ -47,7 +47,7 @@ class CheckInterfaceTest(unittest.TestCase):
         results = check_interface['check'](self.fetcher(versions), self.tocs)
         self.assertEqual([ok for ok, _ in results], [False, True, True, True, True])
         self.assertEqual(results[0][1],
-                         'wow 12.2.0.71000: interface 120200 MISSING from TwitchEmotes_Standard.toc, TwitchEmotes_Mainline.toc, TwitchEmotes.toc')
+                         'wow 12.2.0.71000: interface 120200 MISSING from TwitchEmotesFR_Standard.toc, TwitchEmotesFR_Mainline.toc, TwitchEmotesFR.toc')
 
     def test_only_the_us_row_counts_whatever_the_column_order(self):
         text = ('VersionsName!String:0|Region!STRING:0|BuildId!DEC:4\n'
@@ -67,7 +67,7 @@ class CheckInterfaceTest(unittest.TestCase):
         self.assertIn('no us version', results[2][1])
 
     def test_manifests_come_from_package_flavor_tocs(self):
-        self.assertEqual(self.tocs['TwitchEmotes_Mists.toc'], '50504')
+        self.assertEqual(self.tocs['TwitchEmotesFR_Mists.toc'], '50504')
         for manifests in check_interface['PRODUCTS'].values():
             for name in manifests + (check_interface['FALLBACK'],):
                 self.assertIn(name, self.tocs)

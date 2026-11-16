@@ -405,7 +405,7 @@ class SequenceTests(unittest.TestCase):
             r'sequence = "\000\001\001\002", '
             'cellWidth = 64, columns = 2, sheetWidth = 128, sheetHeight = 128, creator = "Artist", '
             'source = "https://7tv.app/emotes/ABC123", '
-            r'path = "Interface\\AddOns\\TwitchEmotes\\Media\\7tv\\ABC123.tga" },',
+            r'path = "Interface\\AddOns\\TwitchEmotesFR\\Media\\7tv\\ABC123.tga" },',
             builder.render_lua(lua_pack(), [lua_record(sequence=[0, 1, 1, 2])]))
 
     def test_entries_without_a_meaningful_sequence_keep_the_published_layout(self):
@@ -440,12 +440,12 @@ class BuildTests(unittest.TestCase):
             with self.subTest(sequence=sequence), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 with patch.object(builder, 'convert', convert):
-                    builder.build_packs([seven_tv_pack(seven_tv_emote())], root / 'TwitchEmotes',
+                    builder.build_packs([seven_tv_pack(seven_tv_emote())], root / 'TwitchEmotesFR',
                                         root / 'packs', root / 'cache',
                                         download=lambda _url: png_bytes(), workers=1)
                 manifest = json.loads((root / 'packs' / 'channel.json').read_text())
                 self.assertEqual(manifest['emotes'][0].get('sequence'), expected)
-                lua = (root / 'TwitchEmotes' / 'Packs' / 'channel.lua').read_text()
+                lua = (root / 'TwitchEmotesFR' / 'Packs' / 'channel.lua').read_text()
                 self.assertEqual(r'sequence = "\000\001\001\002"' in lua, expected is not None)
 
     def test_build_refuses_a_converted_sequence_that_leaves_the_stored_cells(self):
@@ -455,7 +455,7 @@ class BuildTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             with patch.object(builder, 'convert', convert), self.assertRaises(ValueError):
-                builder.build_packs([seven_tv_pack(seven_tv_emote())], root / 'TwitchEmotes',
+                builder.build_packs([seven_tv_pack(seven_tv_emote())], root / 'TwitchEmotesFR',
                                     root / 'packs', root / 'cache',
                                     download=lambda _url: png_bytes(), workers=1)
             self.assertFalse((root / 'packs').exists())
@@ -464,7 +464,7 @@ class BuildTests(unittest.TestCase):
         pack = seven_tv_pack(seven_tv_emote())
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            addon, manifests = root / 'TwitchEmotes', root / 'packs'
+            addon, manifests = root / 'TwitchEmotesFR', root / 'packs'
             builder.build_packs([pack], addon, manifests, root / 'cache', download=lambda _: png_bytes(), workers=1)
             old_tga = addon / 'Media/7tv/ABC123.tga'
             old_blp = old_tga.with_suffix('.blp')
@@ -496,9 +496,9 @@ class BuildTests(unittest.TestCase):
         second['id'] = 'second_pack'
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            builder.build_packs([first, second], root / 'TwitchEmotes', root / 'packs',
+            builder.build_packs([first, second], root / 'TwitchEmotesFR', root / 'packs',
                                 root / 'cache', download=lambda _url: png_bytes(), workers=1)
-            textures = list((root / 'TwitchEmotes' / 'Media').rglob('*.tga'))
+            textures = list((root / 'TwitchEmotesFR' / 'Media').rglob('*.tga'))
             self.assertEqual([p.name for p in textures], ['ABC123.tga'])
             manifest = json.loads((root / 'packs' / 'channel.json').read_text())
             self.assertEqual(len(manifest['emotes']), 2)
@@ -507,7 +507,7 @@ class BuildTests(unittest.TestCase):
             second_manifest = json.loads((root / 'packs' / 'second_pack.json').read_text())
             self.assertEqual(manifest['emotes'][0]['texture_sha256'], second_manifest['emotes'][0]['texture_sha256'])
             before = {p.relative_to(root): p.read_bytes() for p in root.rglob('*') if p.is_file()}
-            builder.build_packs([first, second], root / 'TwitchEmotes', root / 'packs',
+            builder.build_packs([first, second], root / 'TwitchEmotesFR', root / 'packs',
                                 root / 'cache', download=lambda _url: png_bytes(), workers=1)
             after = {p.relative_to(root): p.read_bytes() for p in root.rglob('*') if p.is_file()}
             self.assertEqual(after, before)
@@ -516,15 +516,15 @@ class BuildTests(unittest.TestCase):
         first = seven_tv_pack(seven_tv_emote())
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            builder.build_packs([first], root / 'TwitchEmotes', root / 'packs', root / 'cache',
+            builder.build_packs([first], root / 'TwitchEmotesFR', root / 'packs', root / 'cache',
                                 download=lambda _url: png_bytes(), workers=1)
-            before = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotes', 'packs')
+            before = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotesFR', 'packs')
                       for p in (root / folder).rglob('*') if p.is_file()}
             broken = seven_tv_pack(seven_tv_emote(identifier='BROKEN'))
             with self.assertRaises((ValueError, OSError)):
-                builder.build_packs([broken], root / 'TwitchEmotes', root / 'packs', root / 'cache',
+                builder.build_packs([broken], root / 'TwitchEmotesFR', root / 'packs', root / 'cache',
                                     download=lambda _url: b'not an image', workers=1)
-            after = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotes', 'packs')
+            after = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotesFR', 'packs')
                      for p in (root / folder).rglob('*') if p.is_file()}
             self.assertEqual(after, before)
 
@@ -537,27 +537,27 @@ class BuildTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             with self.assertRaises(OSError):
-                builder.build_packs([pack], root / 'TwitchEmotes', root / 'packs', root / 'cache',
+                builder.build_packs([pack], root / 'TwitchEmotesFR', root / 'packs', root / 'cache',
                                     download=download, workers=1)
-            self.assertFalse((root / 'TwitchEmotes' / 'Packs' / 'channel.lua').exists())
-            self.assertFalse((root / 'TwitchEmotes' / 'Media').exists())
+            self.assertFalse((root / 'TwitchEmotesFR' / 'Packs' / 'channel.lua').exists())
+            self.assertFalse((root / 'TwitchEmotesFR' / 'Media').exists())
 
 
     def test_publish_io_failure_rolls_back_prior_texture_and_lua_replacements(self):
         pack = seven_tv_pack(seven_tv_emote())
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            builder.build_packs([pack], root / 'TwitchEmotes', root / 'packs', root / 'cache',
+            builder.build_packs([pack], root / 'TwitchEmotesFR', root / 'packs', root / 'cache',
                                 download=lambda _url: png_bytes(), workers=1)
-            before = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotes', 'packs')
+            before = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotesFR', 'packs')
                       for p in (root / folder).rglob('*') if p.is_file()}
             blocked = root / 'not_a_directory'
             blocked.write_text('occupied')
             changed = seven_tv_pack(seven_tv_emote('changed', 'NEW'))
             with self.assertRaises(OSError):
-                builder.build_packs([changed], root / 'TwitchEmotes', blocked, root / 'cache',
+                builder.build_packs([changed], root / 'TwitchEmotesFR', blocked, root / 'cache',
                                     download=lambda _url: png_bytes((0, 0, 255, 255)), workers=1)
-            after = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotes', 'packs')
+            after = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotesFR', 'packs')
                      for p in (root / folder).rglob('*') if p.is_file()}
             self.assertEqual(after, before)
 
@@ -568,14 +568,14 @@ class BuildTests(unittest.TestCase):
         second['id'] = 'second_pack'
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            builder.build_packs([first, second], root / 'TwitchEmotes', root / 'packs', root / 'cache',
+            builder.build_packs([first, second], root / 'TwitchEmotesFR', root / 'packs', root / 'cache',
                                 download=lambda _url: png_bytes(), workers=1)
-            before = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotes', 'packs')
+            before = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotesFR', 'packs')
                       for p in (root / folder).rglob('*') if p.is_file()}
             with self.assertRaisesRegex(ValueError, 'shared.*second_pack'):
-                builder.build_packs([first], root / 'TwitchEmotes', root / 'packs', root / 'fresh_cache',
+                builder.build_packs([first], root / 'TwitchEmotesFR', root / 'packs', root / 'fresh_cache',
                                     download=lambda _url: png_bytes((0, 0, 255, 255)), workers=1)
-            after = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotes', 'packs')
+            after = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotesFR', 'packs')
                      for p in (root / folder).rglob('*') if p.is_file()}
             self.assertEqual(after, before)
 
@@ -585,7 +585,7 @@ class BuildTests(unittest.TestCase):
         second['id'] = 'second_pack'
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            addon, manifests = root / 'TwitchEmotes', root / 'packs'
+            addon, manifests = root / 'TwitchEmotesFR', root / 'packs'
             builder.build_packs([first], addon, manifests, root / 'cache', download=lambda _url: png_bytes(), workers=1)
             optimized = addon / 'Media/7tv/ABC123.blp'
             (addon / 'Media/7tv/ABC123.tga').rename(optimized)
@@ -596,10 +596,10 @@ class BuildTests(unittest.TestCase):
             manifest['emotes'][0].update(texture='Media/7tv/ABC123.blp', texture_sha256=builder.sha256(optimized),
                                          height=32, lossless=lossless)
             manifest_path.write_text(json.dumps(manifest))
-            before = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotes', 'packs')
+            before = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotesFR', 'packs')
                       for p in (root / folder).rglob('*') if p.is_file()}
             builder.build_packs([second], addon, manifests, root / 'cache', download=lambda _url: png_bytes(), workers=1)
-            after = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotes', 'packs')
+            after = {p.relative_to(root): p.read_bytes() for folder in ('TwitchEmotesFR', 'packs')
                      for p in (root / folder).rglob('*') if p.is_file()}
             self.assertEqual({path: data for path, data in after.items() if path in before}, before)
             self.assertFalse((addon / 'Media/7tv/ABC123.tga').exists())
@@ -618,7 +618,7 @@ class BuildTests(unittest.TestCase):
             def download(url):
                 fetched.append(url)
                 return png_bytes()
-            builder.build_packs([pack], root / 'TwitchEmotes', root / 'packs', root / 'cache',
+            builder.build_packs([pack], root / 'TwitchEmotesFR', root / 'packs', root / 'cache',
                                 download=download, workers=1)
             manifest = json.loads((root / 'packs' / 'channel.json').read_text())
             self.assertEqual([entry['name'] for entry in manifest['emotes']], ['keep', 'lackOfSleep'])
@@ -626,9 +626,9 @@ class BuildTests(unittest.TestCase):
                              [('DEF456', 'OhGodItsLACARIChasingYou', builder.REMOVED_REASON),
                               ('GHI789', 'lacKEK', builder.REMOVED_REASON)])
             self.assertFalse(any('DEF456' in url or 'GHI789' in url for url in fetched))
-            self.assertEqual(sorted(path.name for path in (root / 'TwitchEmotes' / 'Media' / '7tv').iterdir()),
+            self.assertEqual(sorted(path.name for path in (root / 'TwitchEmotesFR' / 'Media' / '7tv').iterdir()),
                              ['ABC123.tga', 'JKL012.tga'])
-            self.assertNotIn('LACARI', (root / 'TwitchEmotes' / 'Packs' / 'channel.lua').read_text())
+            self.assertNotIn('LACARI', (root / 'TwitchEmotesFR' / 'Packs' / 'channel.lua').read_text())
         self.assertEqual(len(pack['emotes']), 4)
 
     def test_case_colliding_provider_ids_cannot_overwrite_windows_texture(self):
@@ -636,7 +636,7 @@ class BuildTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             with self.assertRaisesRegex(ValueError, 'case'):
-                builder.build_packs([pack], root / 'TwitchEmotes', root / 'packs', root / 'cache',
+                builder.build_packs([pack], root / 'TwitchEmotesFR', root / 'packs', root / 'cache',
                                     download=lambda _url: png_bytes(), workers=1)
 
 

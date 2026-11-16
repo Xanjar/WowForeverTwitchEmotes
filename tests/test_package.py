@@ -24,9 +24,9 @@ MODULES = ('Core.lua', 'Text.lua', 'Animation.lua', 'UI.lua', 'Completion.lua', 
 builder = {}
 
 
-def toc_text(interface, modules=MODULES, title='Twitch Emotes'):
-    header = ['## Interface: ' + interface, '## Title: ' + title, '## Author: TheMizeGuy',
-              '## Version: 3.1.0', '## X-License: Free to fork with credit (see LICENSE)', '## SavedVariables: ForeverEmotesDB', '']
+def toc_text(interface, modules=MODULES, title='Twitch Emotes FR'):
+    header = ['## Interface: ' + interface, '## Title: ' + title, '## Author: Xanjar (original by TheMizeGuy)',
+              '## Version: 3.1.0', '## X-License: Free to fork with credit (see LICENSE)', '## SavedVariables: TwitchEmotesFRDB', '']
     return '\n'.join(header + list(modules) + ['Packs\\first.lua', ''])
 
 
@@ -68,12 +68,12 @@ def write_manifest(root, pack):
 
 def publish(root, pack):
     write_manifest(root, pack)
-    (root / 'TwitchEmotes/Packs' / (pack['id'] + '.lua')).write_text(render_lua(pack), encoding='utf-8')
+    (root / 'TwitchEmotesFR/Packs' / (pack['id'] + '.lua')).write_text(render_lua(pack), encoding='utf-8')
 
 
 def fixture(root):
     """Build the smallest install tree that verify() accepts, with one animation and one static."""
-    addon = root / 'TwitchEmotes'
+    addon = root / 'TwitchEmotesFR'
     (addon / 'Media/7tv').mkdir(parents=True)
     (addon / 'Media/UI').mkdir(parents=True)
     (addon / 'Packs').mkdir()
@@ -82,6 +82,7 @@ def fixture(root):
     (root / 'LICENSE').write_bytes(b'All Rights Reserved\n')
     (addon / 'LICENSE').write_bytes(b'All Rights Reserved\n')
     (addon / 'ASSET-NOTICES.md').write_text('# Asset notices\n')
+    (addon / 'README.md').write_text('# Readme\n')
     for name in MODULES:
         (addon / name).write_text('local addonName, E = ...\nreturn E\n')
     write_tocs(addon)
@@ -111,49 +112,49 @@ class VerifyTests(unittest.TestCase):
             files = package.verify(root)
             self.assertEqual(files, sorted(files))
             self.assertEqual(set(files), set(MODULES) | set(package.FLAVOR_TOCS) | {
-                'Packs/first.lua', 'LICENSE', 'ASSET-NOTICES.md',
+                'Packs/first.lua', 'LICENSE', 'ASSET-NOTICES.md', 'README.md',
                 'Media/7tv/catjam.blp', 'Media/7tv/gz.tga', 'Media/UI/TwitchGlitch.tga'})
 
     def test_every_game_type_has_a_manifest_with_its_own_interface_and_title(self):
-        self.assertEqual(set(package.FLAVOR_TOCS), {'TwitchEmotes.toc', 'TwitchEmotes_Mainline.toc',
-                                                    'TwitchEmotes_Standard.toc', 'TwitchEmotes_Camelot.toc',
-                                                    'TwitchEmotes_Mists.toc', 'TwitchEmotes_TBC.toc',
-                                                    'TwitchEmotes_Vanilla.toc'})
+        self.assertEqual(set(package.FLAVOR_TOCS), {'TwitchEmotesFR.toc', 'TwitchEmotesFR_Mainline.toc',
+                                                    'TwitchEmotesFR_Standard.toc', 'TwitchEmotesFR_Camelot.toc',
+                                                    'TwitchEmotesFR_Mists.toc', 'TwitchEmotesFR_TBC.toc',
+                                                    'TwitchEmotesFR_Vanilla.toc'})
         self.assertEqual(set(package.FLAVOR_TITLES), set(package.FLAVOR_TOCS))
-        for name in ('TwitchEmotes_Standard.toc', 'TwitchEmotes_Camelot.toc'):
-            self.assertIn(package.FLAVOR_TOCS[name], package.FLAVOR_TOCS['TwitchEmotes_Mainline.toc'].split(', '),
+        for name in ('TwitchEmotesFR_Standard.toc', 'TwitchEmotesFR_Camelot.toc'):
+            self.assertIn(package.FLAVOR_TOCS[name], package.FLAVOR_TOCS['TwitchEmotesFR_Mainline.toc'].split(', '),
                           'retail and Forever fall back to the Mainline manifest, so it must list their interfaces')
         for name, interface in package.FLAVOR_TOCS.items():
             for value in interface.split(', '):
                 self.assertRegex(value, r'^\d{5,6}$', name)
-            self.assertTrue(package.FLAVOR_TITLES[name].startswith('Twitch Emotes'), name)
+            self.assertTrue(package.FLAVOR_TITLES[name].startswith('Twitch Emotes FR'), name)
 
     def test_a_manifest_with_the_wrong_interface_or_file_list_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fixture(root)
-            (root / 'TwitchEmotes/TwitchEmotes_Vanilla.toc').write_text(toc_text('16001'))
-            with self.assertRaisesRegex(ValueError, 'TwitchEmotes_Vanilla.toc must declare'):
+            (root / 'TwitchEmotesFR/TwitchEmotesFR_Vanilla.toc').write_text(toc_text('16001'))
+            with self.assertRaisesRegex(ValueError, 'TwitchEmotesFR_Vanilla.toc must declare'):
                 package.verify(root)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fixture(root)
-            (root / 'TwitchEmotes/TwitchEmotes_Mists.toc').write_text(
-                toc_text(package.FLAVOR_TOCS['TwitchEmotes_Mists.toc'], MODULES[:-1],
-                         package.FLAVOR_TITLES['TwitchEmotes_Mists.toc']))
-            with self.assertRaisesRegex(ValueError, 'TwitchEmotes_Mists.toc differs'):
+            (root / 'TwitchEmotesFR/TwitchEmotesFR_Mists.toc').write_text(
+                toc_text(package.FLAVOR_TOCS['TwitchEmotesFR_Mists.toc'], MODULES[:-1],
+                         package.FLAVOR_TITLES['TwitchEmotesFR_Mists.toc']))
+            with self.assertRaisesRegex(ValueError, 'TwitchEmotesFR_Mists.toc differs'):
                 package.verify(root)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fixture(root)
-            (root / 'TwitchEmotes/TwitchEmotes_Camelot.toc').write_text(
-                toc_text(package.FLAVOR_TOCS['TwitchEmotes_Camelot.toc'], title='Twitch Emotes (Retail)'))
-            with self.assertRaisesRegex(ValueError, 'TwitchEmotes_Camelot.toc must declare "## Title'):
+            (root / 'TwitchEmotesFR/TwitchEmotesFR_Camelot.toc').write_text(
+                toc_text(package.FLAVOR_TOCS['TwitchEmotesFR_Camelot.toc'], title='Twitch Emotes FR (Retail)'))
+            with self.assertRaisesRegex(ValueError, 'TwitchEmotesFR_Camelot.toc must declare "## Title'):
                 package.verify(root)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fixture(root)
-            (root / 'TwitchEmotes/TwitchEmotes_TBC.toc').unlink()
+            (root / 'TwitchEmotesFR/TwitchEmotesFR_TBC.toc').unlink()
             with self.assertRaises(FileNotFoundError):
                 package.verify(root)
 
@@ -210,14 +211,14 @@ class VerifyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fixture(root)
-            (root / 'TwitchEmotes/Media/7tv/gz.tga').write_bytes(
-                (root / 'TwitchEmotes/Media/7tv/gz.tga').read_bytes()[:-1] + b'\x01')
+            (root / 'TwitchEmotesFR/Media/7tv/gz.tga').write_bytes(
+                (root / 'TwitchEmotesFR/Media/7tv/gz.tga').read_bytes()[:-1] + b'\x01')
             with self.assertRaisesRegex(ValueError, 'texture hash differs'):
                 package.verify(root)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fixture(root)
-            (root / 'TwitchEmotes/UI.lua').unlink()
+            (root / 'TwitchEmotesFR/UI.lua').unlink()
             with self.assertRaisesRegex(ValueError, 'missing or unsafe module'):
                 package.verify(root)
 
@@ -254,10 +255,10 @@ class CompressorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / 'empty.zip'
             with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as archive:
-                package.write_precompressed(archive, 'TwitchEmotes/empty.txt', zipfile.ZIP_STORED, 0, 0, b'')
+                package.write_precompressed(archive, 'TwitchEmotesFR/empty.txt', zipfile.ZIP_STORED, 0, 0, b'')
             with zipfile.ZipFile(output) as archive:
                 self.assertIsNone(archive.testzip())
-                self.assertEqual(archive.read('TwitchEmotes/empty.txt'), b'')
+                self.assertEqual(archive.read('TwitchEmotesFR/empty.txt'), b'')
 
 
 class ArchiveTests(unittest.TestCase):
@@ -272,9 +273,9 @@ class ArchiveTests(unittest.TestCase):
         with zipfile.ZipFile(output) as archive:
             self.assertIsNone(archive.testzip())
             self.assertEqual([member.filename for member in archive.infolist()],
-                             ['TwitchEmotes/' + name for name in files])
+                             ['TwitchEmotesFR/' + name for name in files])
             for member in archive.infolist():
-                data = (root / 'TwitchEmotes' / member.filename.split('/', 1)[1]).read_bytes()
+                data = (root / 'TwitchEmotesFR' / member.filename.split('/', 1)[1]).read_bytes()
                 self.assertEqual(archive.read(member), data)
                 self.assertEqual((member.file_size, member.CRC), (len(data), zlib.crc32(data)))
                 self.assertIn(member.compress_type, (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED))
@@ -321,7 +322,7 @@ class ArchiveTests(unittest.TestCase):
             files = package.verify(root)
             output = root / 'dist/short.zip'
             self.build(root, files, output, package.select_compressor('auto'))
-            names = ['TwitchEmotes/' + name for name in files]
+            names = ['TwitchEmotesFR/' + name for name in files]
             with self.assertRaisesRegex(ValueError, 'ZIP members differ'):
                 package.audit_zip(output, root, names[:-1])
 

@@ -1,0 +1,31 @@
+## Interface: 120105
+## Title: Twitch Emotes FR (Retail)
+## IconTexture: Interface\Icons\INV_Misc_Dice_01
+## Author: Xanjar (original by TheMizeGuy)
+## Notes: French streamer edition of Twitch Emotes WoW Forever by TheMizeGuy (unofficial, modified).
+## Version: 3.2.1-fr.1
+## Category: Chat & Communication
+## X-License: Free to fork with credit (see LICENSE)
+## X-Website: https://github.com/Xanjar/WowForeverTwitchEmotes
+## X-Original: https://github.com/TheMizeGuy/WowForeverTwitchEmotes
+## SavedVariables: TwitchEmotesFRDB
+
+Core.lua
+Text.lua
+Packs\bttv_global.lua
+Packs\ffz_global.lua
+Packs\seventv_global.lua
+Packs\twitch_global.lua
+Packs\botkz.lua
+Packs\doigby.lua
+Packs\etoiles.lua
+Packs\gotaga.lua
+Packs\hiro_llol.lua
+Packs\kamet0.lua
+Packs\locklear.lua
+Packs\mynthos.lua
+Packs\zerator.lua
+Animation.lua
+UI.lua
+Completion.lua
+Runtime.lua

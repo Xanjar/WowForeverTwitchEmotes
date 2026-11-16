@@ -1,14 +1,33 @@
-# Twitch Emotes WoW Forever
+# Twitch Emotes FR
+
+**French streamer edition of [Twitch Emotes WoW Forever](https://github.com/TheMizeGuy/WowForeverTwitchEmotes) by TheMizeGuy.**
+This is an unofficial, modified version. It is not made or endorsed by TheMizeGuy or by the streamers it includes.
+All credit for the addon itself goes to TheMizeGuy; see [LICENSE](LICENSE).
+
+> 🇫🇷 Version française de l'addon *Twitch Emotes WoW Forever* de TheMizeGuy, avec les emotes 7TV des
+> streamers français. Version modifiée et non officielle. Tapez `/tefr` en jeu.
+
+### Changes from the original
+
+- **Channels:** the French streamers Kameto, Locklear, Mynthos, Gotaga, Doigby, ZeratoR, Etoiles, Botkz and Hiro
+  (each from their 7TV emote set), plus the provider-wide Twitch, 7TV, BTTV and FFZ emotes under **General**.
+  The original's English-speaking channels are not included, to stay under CurseForge's 200 MB upload limit.
+- **Every channel starts enabled.**
+- **Renamed so it installs next to the original:** folder `TwitchEmotesFR`, saved variable `TwitchEmotesFRDB`,
+  slash commands `/tefr` and `/twitchfr`, and its own window, menu, minimap button and chat link names.
+- New animated textures were fitted to the size budget with the original's own `optimize-textures.py`.
+
+Everything below is the original documentation, adapted to the renamed folder and commands.
 
 Animated emotes, a searchable visual browser, and chat completion for every live World of
 Warcraft client: Retail, Mists of Pandaria Classic, Anniversary, Classic Era, and WoW Forever.
 
 ## In game
 
-Open the window with `/te`, `/twitch`, or the minimap button. Browse channel groups,
+Open the window with `/tefr`, `/twitchfr`, or the minimap button. Browse channel groups,
 search by name, save favorites, or revisit recently sent emotes. Each Twitch channel
-has one group; provider-wide emotes appear under **General**. General, Graycen,
-Forsen, Erobb221, xQc, and Asmongold start enabled. The first time you enter the world
+has one group; provider-wide emotes appear under **General**. Every channel starts
+enabled. The first time you enter the world
 with the addon, the window opens on a welcome page with the channel picker, two seconds
 after the loading screen lifts; it waits out combat, a cinematic or hidden interface,
 death, and open dialogs. Each channel shows how many emotes
@@ -45,7 +64,7 @@ Settings include an emote-size slider with a live preview (12–40 pixels, 28 by
 chat channels, enabled groups, animation, the playback
 limit (15, 30, or 60 FPS; 60 by default), and minimap visibility. Drag the minimap button to move it.
 Minimap button collectors such as MinimapButtonButton, Leatrix Plus and EllesmereUI can gather the
-button: when another addon has loaded LibDBIcon, the button registers there (as `TwitchEmotes`, also a
+button: when another addon has loaded LibDBIcon, the button registers there (as `TwitchEmotesFR`, also a
 LibDataBroker launcher); otherwise the addon draws its own button, named `TwitchEmotesMinimapButton`.
 Neither library is bundled.
 Animation follows each source's timing; the playback limit cannot add motion absent
@@ -55,21 +74,21 @@ chat input.
 
 ## Install
 
-Place the `TwitchEmotes` folder in the client's `Interface/AddOns` directory (`_retail_`,
+Place the `TwitchEmotesFR` folder in the client's `Interface/AddOns` directory (`_retail_`,
 `_classic_`, `_anniversary_`, `_classic_era_`, or `_forever_`). Keep the folder name
-`TwitchEmotes`. One install serves every client: each game type reads its own manifest
-(`TwitchEmotes_Standard.toc` for Retail, `_Camelot` for Forever, `_Mists`, `_TBC`, `_Vanilla`;
-`_Mainline` is the family fallback Retail and Forever share, and `TwitchEmotes.toc` the last
+`TwitchEmotesFR`. One install serves every client: each game type reads its own manifest
+(`TwitchEmotesFR_Standard.toc` for Retail, `_Camelot` for Forever, `_Mists`, `_TBC`, `_Vanilla`;
+`_Mainline` is the family fallback Retail and Forever share, and `TwitchEmotesFR.toc` the last
 resort), all listing the same files and each titled for its game version in the AddOn List,
 such as "Twitch Emotes (Classic Era)". The Interface numbers are the live builds the release
 was audited against: 120105, 50504, 20506, 11509, and 16001.
 **Fully exit and restart WoW after installing 3.2.1**, including updates from an earlier
 build: `/reload` alone can leave newly installed textures as green boxes until the client
 restarts. Later Lua-only updates take `/reload`; new textures or a changed TOC require a
-restart. Preferences and usage are saved in `ForeverEmotesDB`, one table per client. Since
+restart. Preferences and usage are saved in `TwitchEmotesFRDB`, one table per client. Since
 3.0.1 the addon keeps existing 3.x preferences and usage counts and imports nothing from
 other emote addons.
-If preferences reset, `/te status` reports the settings received during startup and
+If preferences reset, `/tefr status` reports the settings received during startup and
 whether the active settings still match WoW's saved table. Early WoW Forever beta
 clients never loaded saved addon settings; the live client does, so finishing the
 first-run picker is remembered there as on every other client.
@@ -91,7 +110,7 @@ from a virtual environment built with `python3 -m venv .venv && .venv/bin/pip in
 scripts/requirements-build.txt` (Pillow, numpy, imagequant, and the optional libdeflate
 binding, which sizes candidates the way the release ZIP compresses them; zlib level 9
 stands in without it). The optimizer reads every lossless 64 px TGA sheet from `--source`
-(the `dist/TwitchEmotes-3.0.0-tga-baseline.zip` archive when present, otherwise the addon
+(the `dist/TwitchEmotesFR-3.0.0-tga-baseline.zip` archive when present, otherwise the addon
 `Media` directory) and never from a converted BLP. Each animation is snapped (alpha 5 and
 below becomes 0, 250 and above becomes 255), temporally stabilised (`--hold 3`, two passes
 around the loop seam, identical source frames forced identical), and folded so exact and
@@ -126,14 +145,14 @@ combat. Pass `classic` as the first argument (or set `TWITCHEMOTES_PROFILE=class
 `ui_spec` and `integration_spec` under a client shape without the Forbidden-aspect API, the
 retail minimap atlas or `GetCurrentKeyBoardFocus`.
 Run `luajit tests/integration_spec.lua [classic]` to load the actual manifests and all packs
-through the external WoW boundary. `python3 -I scripts/api-xref.py TwitchEmotes <wowui-root> out.json`
+through the external WoW boundary. `python3 -I scripts/api-xref.py TwitchEmotesFR <wowui-root> out.json`
 cross-references every global, namespace member, template, event and EventRegistry callback the
 runtime modules use against shallow clones of Blizzard's shipped UI source
 (`github.com/Gethe/wow-ui-source`, one clone per branch under `<wowui-root>`: `live`, `classic`,
 `classic_anniversary`, `classic_era`, `forever`) and flags anything a client lacks; every name it
 flags today is guarded in the code. `python3 scripts/package.py` verifies every texture
 hash, format, TOC reference, playback sequence, and generated Lua manifest; add
-`--output dist/TwitchEmotes-3.2.1.zip` to create a release archive. Members are
+`--output dist/TwitchEmotesFR-3.2.1.zip` to create a release archive. Members are
 deflated in parallel (`--workers`) with libdeflate level 12, zopfli, or zlib level 9,
 whichever `--compressor auto` finds installed, always as an ordinary ZIP with fixed
 timestamps, so one install packs to the same bytes every time. The finished archive
@@ -144,7 +163,7 @@ Before a release, `python3 scripts/check-interface.py` reads the live `us` build
 `wow`, `wow_classic`, `wow_anniversary`, `wow_classic_era` and `wowf` from the
 Battle.net versions endpoints, computes each interface number
 (major × 10000 + minor × 100 + patch) and fails unless the client's manifest and the
-fallback `TwitchEmotes.toc` in `FLAVOR_TOCS` declare it; it prints one line per client.
+fallback `TwitchEmotesFR.toc` in `FLAVOR_TOCS` declare it; it prints one line per client.
 `python3 tests/test_check_interface.py` tests it offline.
 `.venv/bin/python tests/test_texture_optimizer.py` checks format validation, transparency,
 temporal cleanup, sequences, layout, allocation, shared references, quality fallback,
@@ -156,9 +175,9 @@ every file before replacing this addon's folder. It defaults to the author's WoW
 client (`_forever_`) on `mizepc`; pass another client's `Interface\AddOns` path to deploy
 there. It refuses a path whose client folder, two levels above `AddOns`, holds neither
 `.flavor.info` nor a `Wow*.exe`, so a mistyped path creates nothing. It also refuses to
-replace a `TwitchEmotes` folder whose TOC lacks `## Author: TheMizeGuy`, such as another
+replace a `TwitchEmotesFR` folder whose TOC lacks `## Author: TheMizeGuy`, such as another
 addon published under that folder name, unless `--replace-foreign` is given. The folder it
-replaces is moved to `TwitchEmotes.previous-<yyyyMMddHHmmss>` in the same `AddOns` folder,
+replaces is moved to `TwitchEmotesFR.previous-<yyyyMMddHHmmss>` in the same `AddOns` folder,
 which the client ignores; delete it by hand once the new build works.
 
 ## Rights

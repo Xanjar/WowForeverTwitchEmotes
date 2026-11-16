@@ -26,7 +26,7 @@ local function setup(saved,options)
     _G.GetTime=function() return world.time end
     _G.UnitGUID=function() return "Player-self" end
     _G.IsShiftKeyDown=function() return world.shift or false end
-    _G.ForeverEmotesDB=saved; _G.Emoticons_Settings={MINIMAPBUTTON=false}; _G.TwitchEmoteStatistics={KEKW={"",2,3}}
+    _G.TwitchEmotesFRDB=saved; _G.Emoticons_Settings={MINIMAPBUTTON=false}; _G.TwitchEmoteStatistics={KEKW={"",2,3}}
     _G.DEFAULT_CHAT_FRAME={AddMessage=function(_,message) world.messages[#world.messages+1]=message end}
     _G.SlashCmdList={}
     _G.CreateFrame=function()
@@ -59,12 +59,12 @@ local function setup(saved,options)
     _G.EventRegistry={RegisterCallback=function(_,name,fn,owner) world.callbacks[name]={fn=fn,owner=owner} end}
     _G.GameTooltip={SetOwner=function() end,AddLine=function() end,Show=function() world.tooltip=true end,Hide=function() world.tooltip=false end}
     for _,name in ipairs({"Core","Text","Animation","Runtime"}) do
-        local chunk=assert(loadfile("TwitchEmotes/"..name..".lua")); chunk("TwitchEmotes",E)
+        local chunk=assert(loadfile("TwitchEmotesFR/"..name..".lua")); chunk("TwitchEmotesFR",E)
     end
     E.channelLabels.CHAT_MSG_GUILD_DISCORD=E.channelLabels.CHAT_MSG_GUILD_DISCORD or "Guild Discord"
     E:RegisterPack({id="test",group="general",emotes={
-        {name="KEKW",path="Interface\\AddOns\\TwitchEmotes\\Media\\kekw.tga",width=32,height=32,sheetWidth=32,sheetHeight=32,frames=1,fps=0},
-        {name="catJAM",path="Interface\\AddOns\\TwitchEmotes\\Media\\cat.tga",width=32,height=32,sheetWidth=32,sheetHeight=128,frames=4,fps=10},
+        {name="KEKW",path="Interface\\AddOns\\TwitchEmotesFR\\Media\\kekw.tga",width=32,height=32,sheetWidth=32,sheetHeight=32,frames=1,fps=0},
+        {name="catJAM",path="Interface\\AddOns\\TwitchEmotesFR\\Media\\cat.tga",width=32,height=32,sheetWidth=32,sheetHeight=128,frames=4,fps=10},
     }})
     function E:InitializeUI() world.ui=(world.ui or 0)+1; if options.uiError then error("UI construction failed") end end
     function E:AttachCompletion(box) box.attached=true end
@@ -77,7 +77,7 @@ local function setup(saved,options)
     function E:InsertEmote(name) world.inserted=name; return true end
     function E:RefreshUI() world.refreshed=true end
     world.eventFrame=world.frames[1]
-    world.eventFrame:Fire("ADDON_LOADED","TwitchEmotes")
+    world.eventFrame:Fire("ADDON_LOADED","TwitchEmotesFR")
     if not options.deferLogin then world.eventFrame:Fire("PLAYER_LOGIN") end
     world.loadedMinimap=E.db.minimap; world.loadedSent=E:Stats("KEKW").sent; world.loadedSeen=E:Stats("KEKW").seen
     E.db.stats={}
@@ -135,30 +135,30 @@ local function setup(saved,options)
 end
 
 test("login initializes once and slash command opens picker",function()
-    local E,w=setup(); equal(E.db,ForeverEmotesDB); equal(w.ui,1)
+    local E,w=setup(); equal(E.db,TwitchEmotesFRDB); equal(w.ui,1)
     w.eventFrame:Fire("PLAYER_LOGIN"); equal(w.ui,1)
-    assert(w.filters.CHAT_MSG_SAY); SlashCmdList.FOREVEREMOTES(""); equal(w.open,true)
+    assert(w.filters.CHAT_MSG_SAY); SlashCmdList.TWITCHEMOTESFR(""); equal(w.open,true)
     equal(w.loadedMinimap,true); equal(w.loadedSent,0); equal(w.loadedSeen,0)
 end)
 
 test("startup retains native preferences and statistics despite legacy globals",function()
     local E,w=setup({schema=4,minimap=false,stats={KEKW={sent=9,seen=11}}})
-    equal(E.db,ForeverEmotesDB); equal(w.loadedMinimap,false)
+    equal(E.db,TwitchEmotesFRDB); equal(w.loadedMinimap,false)
     equal(w.loadedSent,9); equal(w.loadedSeen,11)
 end)
 
 test("status distinguishes missing saved data from loaded preferences before defaults",function()
     local E,w=setup()
-    SlashCmdList.FOREVEREMOTES("status")
+    SlashCmdList.TWITCHEMOTESFR("status")
     assert(table.concat(w.messages,"\n"):find("Saved at load: nil",1,true))
     equal(w.open,nil,"status must not open the browser")
     local saved={schema=2,size=35,minimapAngle=125.5,setupComplete=true,packs={test=true}}
     E,w=setup(saved)
     local db=E.db
-    SlashCmdList.FOREVEREMOTES("status")
+    SlashCmdList.TWITCHEMOTESFR("status")
     local report=table.concat(w.messages,"\n")
     assert(report:find("Saved at load: table",1,true)); assert(report:find("size=35",1,true))
-    assert(report:find("angle=125.5",1,true)); equal(E.db,db); equal(ForeverEmotesDB,db)
+    assert(report:find("angle=125.5",1,true)); equal(E.db,db); equal(TwitchEmotesFRDB,db)
     assert(db._startup[1]:find("size=35",1,true),"startup observations must survive the next native save")
 end)
 test("filter preserves every trailing argument and nil",function()
@@ -245,7 +245,7 @@ test("events the client does not know are skipped and login still completes",fun
     equal(w.filters.CHAT_MSG_GUILD_DISCORD,nil); equal(w.eventFrame.events.CHAT_MSG_GUILD_DISCORD,nil)
     assert(w.filters.CHAT_MSG_SAY); equal(w.eventFrame.events.CHAT_MSG_SAY,true)
     assert(w.callbacks.SetItemRef); assert(w.hooks.FCF_OpenTemporaryWindow)
-    SlashCmdList.FOREVEREMOTES(""); equal(w.open,true)
+    SlashCmdList.TWITCHEMOTESFR(""); equal(w.open,true)
 end)
 test("a whisper to yourself counts as sent once",function()
     local E,w=setup()
@@ -259,7 +259,7 @@ test("a UI fault at login still leaves chat rendering, links and the slash comma
     equal(ok,false); assert(tostring(err):find("UI construction failed",1,true),"the UI error must reach the error handler")
     assert(w.filters.CHAT_MSG_SAY); assert(f.refresh); equal(f.editBox.attached,true)
     assert(w.callbacks.SetItemRef); assert(w.callbacks["ChatFrame.OnHyperlinkEnter"]); assert(w.hooks.FCF_OpenTemporaryWindow)
-    equal(w.eventFrame.events.UPDATE_CHAT_WINDOWS,true); equal(type(SlashCmdList.FOREVEREMOTES),"function")
+    equal(w.eventFrame.events.UPDATE_CHAT_WINDOWS,true); equal(type(SlashCmdList.TWITCHEMOTESFR),"function")
 end)
 test("temporary whisper windows opened after login attach display and completion once",function()
     local E,w=setup(); assert(w.hooks.FCF_OpenTemporaryWindow)
@@ -304,7 +304,7 @@ test("the first world entry opens the first-run picker a moment after the loadin
     assert(w.delays[#w.delays]>0,"the picker waits a moment after the loading screen")
     equal(#w:Timers(),0); equal(w.firstRuns,1)
     equal(w.eventFrame.events.PLAYER_ENTERING_WORLD,nil); equal(w.eventFrame.events.LOADING_SCREEN_DISABLED,nil)
-    assert(ForeverEmotesDB._startup[#ForeverEmotesDB._startup]:find("After world entry",1,true),"the startup sample still runs")
+    assert(TwitchEmotesFRDB._startup[#TwitchEmotesFRDB._startup]:find("After world entry",1,true),"the startup sample still runs")
 end)
 test("the first-run picker opens at most once per session",function()
     local E,w=setup(); w:Enter(); equal(w.firstRuns,1)
@@ -385,7 +385,7 @@ test("a failing first-run picker leaves chat rendering, links and the slash comm
     local _,text=w.filters.CHAT_MSG_SAY({},"CHAT_MSG_SAY","KEKW"); assert(text:find("|T",1,true))
     w:Chat("KEKW","Player-other",61); equal(E:Stats("KEKW").seen,1)
     w.shift=true; w:Callback("SetItemRef",E.linkPrefix.."4b454b57","","LeftButton",{}); equal(w.inserted,"KEKW")
-    SlashCmdList.FOREVEREMOTES(""); equal(w.open,true)
+    SlashCmdList.TWITCHEMOTESFR(""); equal(w.open,true)
     w.eventFrame:Fire("UPDATE_CHAT_WINDOWS"); equal(f.editBox.attached,true)
     w.eventFrame.scripts.OnEvent(w.eventFrame,"PLAYER_REGEN_ENABLED"); equal(w.firstRuns,1,"a failure is not retried this session")
     -- The combat path fails the same way and leaves nothing registered.

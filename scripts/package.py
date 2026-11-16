@@ -21,23 +21,23 @@ COMPRESSORS = ('libdeflate', 'zopfli', 'zlib')
 # release was audited against. A client reads its game-type manifest (Standard for retail, Camelot for Forever)
 # before the family one and the bare TOC, so Mainline lists both of its numbers and the bare TOC lists every one.
 FLAVOR_TOCS = {
-    'TwitchEmotes.toc': '120105, 50504, 20506, 11509, 16001',
-    'TwitchEmotes_Mainline.toc': '120105, 16001',
-    'TwitchEmotes_Standard.toc': '120105',
-    'TwitchEmotes_Camelot.toc': '16001',
-    'TwitchEmotes_Mists.toc': '50504',
-    'TwitchEmotes_TBC.toc': '20506',
-    'TwitchEmotes_Vanilla.toc': '11509',
+    'TwitchEmotesFR.toc': '120105, 50504, 20506, 11509, 16001',
+    'TwitchEmotesFR_Mainline.toc': '120105, 16001',
+    'TwitchEmotesFR_Standard.toc': '120105',
+    'TwitchEmotesFR_Camelot.toc': '16001',
+    'TwitchEmotesFR_Mists.toc': '50504',
+    'TwitchEmotesFR_TBC.toc': '20506',
+    'TwitchEmotesFR_Vanilla.toc': '11509',
 }
 # The AddOn List title names the game version; the fallbacks that several clients could read stay generic.
 FLAVOR_TITLES = {
-    'TwitchEmotes.toc': 'Twitch Emotes',
-    'TwitchEmotes_Mainline.toc': 'Twitch Emotes',
-    'TwitchEmotes_Standard.toc': 'Twitch Emotes (Retail)',
-    'TwitchEmotes_Camelot.toc': 'Twitch Emotes (WoW Forever)',
-    'TwitchEmotes_Mists.toc': 'Twitch Emotes (Mists Classic)',
-    'TwitchEmotes_TBC.toc': 'Twitch Emotes (TBC Anniversary)',
-    'TwitchEmotes_Vanilla.toc': 'Twitch Emotes (Classic Era)',
+    'TwitchEmotesFR.toc': 'Twitch Emotes FR',
+    'TwitchEmotesFR_Mainline.toc': 'Twitch Emotes FR',
+    'TwitchEmotesFR_Standard.toc': 'Twitch Emotes FR (Retail)',
+    'TwitchEmotesFR_Camelot.toc': 'Twitch Emotes FR (WoW Forever)',
+    'TwitchEmotesFR_Mists.toc': 'Twitch Emotes FR (Mists Classic)',
+    'TwitchEmotesFR_TBC.toc': 'Twitch Emotes FR (TBC Anniversary)',
+    'TwitchEmotesFR_Vanilla.toc': 'Twitch Emotes FR (Classic Era)',
 }
 ENCODER_MODULES = {'libdeflate': 'deflate', 'zopfli': 'zopfli.zlib', 'zlib': 'zlib'}
 ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
@@ -130,7 +130,7 @@ def audit_zip(output, root, names):
 
 
 def build_zip(root, output, files, compressor, workers):
-    names = ['TwitchEmotes/' + name for name in files]
+    names = ['TwitchEmotesFR/' + name for name in files]
     jobs = [(name, root / name, compressor) for name in names]
     print(f'Compressing {len(jobs)} files with {compressor} in {workers} process(es)')
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -169,14 +169,14 @@ def verify_tocs(addon):
             shared = rest
         elif rest != shared:
             raise ValueError(name + ' differs from the other manifests beyond its Interface and Title lines')
-    for directive in ('## Author: TheMizeGuy', '## X-License: Free to fork with credit (see LICENSE)', '## SavedVariables: ForeverEmotesDB'):
+    for directive in ('## Author: Xanjar (original by TheMizeGuy)', '## X-License: Free to fork with credit (see LICENSE)', '## SavedVariables: TwitchEmotesFRDB'):
         if directive not in shared:
             raise ValueError('missing TOC metadata: ' + directive)
     return shared
 
 
 def verify(root):
-    addon = root / 'TwitchEmotes'
+    addon = root / 'TwitchEmotesFR'
     toc = verify_tocs(addon)
     files = [line.strip().replace('\\', '/') for line in toc
              if line.strip() and not line.startswith('#')]
@@ -190,7 +190,7 @@ def verify(root):
         if not path.is_file() or path.is_symlink() or '..' in Path(file).parts:
             raise ValueError('missing or unsafe module: ' + file)
         subprocess.run(['luajit', '-bl', str(path)], check=True, stdout=subprocess.DEVNULL)
-    expected = set(files) | set(FLAVOR_TOCS) | {'LICENSE', 'ASSET-NOTICES.md'}
+    expected = set(files) | set(FLAVOR_TOCS) | {'LICENSE', 'ASSET-NOTICES.md', 'README.md'}
     render_lua = runpy.run_path(str(Path(__file__).with_name('build-7tv-pack.py')))['render_lua']
     checked, aliases, groups = {}, 0, set()
     for file in files:

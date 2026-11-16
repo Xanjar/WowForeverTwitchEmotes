@@ -6,12 +6,12 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
-if ($StageName -notmatch '^\.TwitchEmotes-stage-[a-zA-Z0-9-]+$') { throw 'Invalid staging folder' }
+if ($StageName -notmatch '^\.TwitchEmotesFR-stage-[a-zA-Z0-9-]+$') { throw 'Invalid staging folder' }
 $root = (Get-Item -LiteralPath $AddOnsPath).FullName
 $stage = Join-Path $root $StageName
-$incoming = Join-Path $stage 'TwitchEmotes'
-$target = Join-Path $root 'TwitchEmotes'
-$previous = Join-Path $root ('TwitchEmotes.previous-' + (Get-Date -Format 'yyyyMMddHHmmss'))
+$incoming = Join-Path $stage 'TwitchEmotesFR'
+$target = Join-Path $root 'TwitchEmotesFR'
+$previous = Join-Path $root ('TwitchEmotesFR.previous-' + (Get-Date -Format 'yyyyMMddHHmmss'))
 foreach ($path in @($stage, $incoming, $target)) {
     if ((Test-Path -LiteralPath $path) -and ((Get-Item -LiteralPath $path -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
         throw "Refusing linked addon folder: $path"
@@ -31,16 +31,16 @@ foreach ($item in $manifest) {
 }
 $count = @(Get-ChildItem -LiteralPath $incoming -Recurse -File -Force).Count
 if ($count -ne $manifest.Count) { throw "Unexpected files in staged addon: $count" }
-if (!(Test-Path -LiteralPath (Join-Path $incoming 'TwitchEmotes_Camelot.toc'))) { throw 'Missing client manifest' }
+if (!(Test-Path -LiteralPath (Join-Path $incoming 'TwitchEmotesFR_Camelot.toc'))) { throw 'Missing client manifest' }
 if (Test-Path -LiteralPath $target) {
     $authors = @(Get-ChildItem -LiteralPath $target -Filter '*.toc' -File -Force | Select-String -Pattern '^## Author:' | ForEach-Object { $_.Line.Trim() } | Select-Object -Unique)
     if (($authors -notcontains '## Author: TheMizeGuy') -and -not $ReplaceForeign) {
         Remove-Item -LiteralPath $stage -Recurse -Force
-        throw "Existing TwitchEmotes folder was not built by TheMizeGuy ($($authors -join '; ')); pass -ReplaceForeign to move it aside"
+        throw "Existing TwitchEmotesFR folder was not built by TheMizeGuy ($($authors -join '; ')); pass -ReplaceForeign to move it aside"
     }
     if (Test-Path -LiteralPath $previous) { throw "Backup folder already exists: $previous" }
     Move-Item -LiteralPath $target -Destination $previous
-    Write-Output "Moved the previous TwitchEmotes folder to $previous"
+    Write-Output "Moved the previous TwitchEmotesFR folder to $previous"
 }
 try {
     Move-Item -LiteralPath $incoming -Destination $target
@@ -50,6 +50,6 @@ try {
 }
 $installed = @(Get-ChildItem -LiteralPath $target -Recurse -File -Force).Count
 if ($installed -ne $manifest.Count) { throw 'Installed file count changed unexpectedly' }
-$version = Get-Content -LiteralPath (Join-Path $target 'TwitchEmotes_Camelot.toc') | Select-String '^## Version:'
+$version = Get-Content -LiteralPath (Join-Path $target 'TwitchEmotesFR_Camelot.toc') | Select-String '^## Version:'
 Remove-Item -LiteralPath $stage -Recurse -Force
 Write-Output "Installed $installed verified files. $version"

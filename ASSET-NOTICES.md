@@ -13,7 +13,7 @@ recorded in `assets/twitch-glitch.json`. The logo is used inside the addon to
 identify Twitch emotes; this addon is not affiliated with or endorsed by Twitch.
 TheMizeGuy's code copyright does not cover the Twitch logo.
 
-The emote artwork in `TwitchEmotes/Media/` comes from Twitch, 7TV, BetterTTV, and
+The emote artwork in `TwitchEmotesFR/Media/` comes from Twitch, 7TV, BetterTTV, and
 FrankerFaceZ. TheMizeGuy's code copyright does not claim ownership of this
 artwork or grant rights to it. Provider accounts identify the attribution
 available through each catalog; an uploader account is not a verification of

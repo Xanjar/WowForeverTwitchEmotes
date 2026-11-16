@@ -10,13 +10,13 @@ VERSIONS_URL = 'https://us.version.battle.net/{}/versions'
 # Battle.net product -> the manifests that client may read: its game-type manifest first, then the Mainline
 # family fallback for retail (wow) and Forever (wowf); the bare TOC lists every client's number as well.
 PRODUCTS = {
-    'wow': ('TwitchEmotes_Standard.toc', 'TwitchEmotes_Mainline.toc'),
-    'wow_classic': ('TwitchEmotes_Mists.toc',),
-    'wow_anniversary': ('TwitchEmotes_TBC.toc',),
-    'wow_classic_era': ('TwitchEmotes_Vanilla.toc',),
-    'wowf': ('TwitchEmotes_Camelot.toc', 'TwitchEmotes_Mainline.toc'),
+    'wow': ('TwitchEmotesFR_Standard.toc', 'TwitchEmotesFR_Mainline.toc'),
+    'wow_classic': ('TwitchEmotesFR_Mists.toc',),
+    'wow_anniversary': ('TwitchEmotesFR_TBC.toc',),
+    'wow_classic_era': ('TwitchEmotesFR_Vanilla.toc',),
+    'wowf': ('TwitchEmotesFR_Camelot.toc', 'TwitchEmotesFR_Mainline.toc'),
 }
-FALLBACK = 'TwitchEmotes.toc'
+FALLBACK = 'TwitchEmotesFR.toc'
 
 
 def flavor_tocs(package=Path(__file__).with_name('package.py')):

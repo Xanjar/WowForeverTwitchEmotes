@@ -83,7 +83,7 @@ def sheet_of(frames, columns=2):
 
 def fixture(root, animation=None, static=None):
     """Two packs sharing one animation plus one static in the first pack; lossless sources kept in root/source."""
-    addon = root / 'TwitchEmotes'
+    addon = root / 'TwitchEmotesFR'
     for directory in (addon / 'Media/7tv', addon / 'Packs', root / 'packs', root / 'source/7tv'):
         directory.mkdir(parents=True, exist_ok=True)
     if animation is None:
@@ -355,7 +355,7 @@ class OptimizeTests(unittest.TestCase):
                 for a, b in zip(old['emotes'], new['emotes']):
                     self.assertEqual({k: v for k, v in a.items() if k not in ('texture', 'texture_sha256', 'frames', 'columns', 'sheetWidth', 'sheetHeight')},
                                      {k: v for k, v in b.items() if k not in ('texture', 'texture_sha256', 'frames', 'columns', 'sheetWidth', 'sheetHeight', 'sequence', 'lossless')})
-                    data = (root / 'TwitchEmotes' / b['texture']).read_bytes()
+                    data = (root / 'TwitchEmotesFR' / b['texture']).read_bytes()
                     self.assertEqual(b['texture_sha256'], hashlib.sha256(data).hexdigest())
                     self.assertEqual(texture_formats.texture_dimensions(data, '.blp'), (b['sheetWidth'], b['sheetHeight']))
                     if a['frames'] > 1:
@@ -377,10 +377,10 @@ class OptimizeTests(unittest.TestCase):
                         decoded = np.asarray(texture_formats.decode_blp2(data))
                         self.assertEqual(decoded[:, :, 3].tolist(), static[:, :, 3].tolist())
                         self.assertLess(pipeline.visible_rms(static[:, :, :3], static[:, :, 3], decoded[:, :, :3], decoded[:, :, 3]), 2)
-                self.assertEqual((root / 'TwitchEmotes/Packs' / (old['id'] + '.lua')).read_text(),
+                self.assertEqual((root / 'TwitchEmotesFR/Packs' / (old['id'] + '.lua')).read_text(),
                                  optimizer.builder['render_lua'](new, new['emotes']))
-            self.assertFalse((root / 'TwitchEmotes/Media/7tv/animation.tga').exists())
-            self.assertFalse((root / 'TwitchEmotes/Media/7tv/static.tga').exists())
+            self.assertFalse((root / 'TwitchEmotesFR/Media/7tv/animation.tga').exists())
+            self.assertFalse((root / 'TwitchEmotesFR/Media/7tv/static.tga').exists())
             first = snapshot(root)
             self.assertEqual(run(root)['published'], dict(textures=0, packs=0, lua=0))
             self.assertEqual(snapshot(root), first)
@@ -412,14 +412,14 @@ class OptimizeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / 'repo'
             fixture(root, animation=noise + [noise[1]], static=static)
-            static_bytes = (root / 'TwitchEmotes/Media/7tv/static.tga').read_bytes()
+            static_bytes = (root / 'TwitchEmotesFR/Media/7tv/static.tga').read_bytes()
             summary = run(root)
             self.assertEqual((summary['statics_converted'], summary['tga_remaining']), (0, 2))
-            self.assertEqual((root / 'TwitchEmotes/Media/7tv/static.tga').read_bytes(), static_bytes)
+            self.assertEqual((root / 'TwitchEmotesFR/Media/7tv/static.tga').read_bytes(), static_bytes)
             entry = json.loads((root / 'packs/second.json').read_text())['emotes'][0]
             self.assertEqual(entry['texture'], 'Media/7tv/animation.tga')
             self.assertEqual((entry['frames'], entry['sequence'], entry['columns'], entry['sheetWidth']), (3, [0, 1, 2, 1], 3, 256))
-            data = (root / 'TwitchEmotes' / entry['texture']).read_bytes()
+            data = (root / 'TwitchEmotesFR' / entry['texture']).read_bytes()
             self.assertEqual(hashlib.sha256(data).hexdigest(), entry['texture_sha256'])
             self.assertEqual(texture_formats.texture_dimensions(data, '.tga'), (256, 64))
             cells = pipeline.cut_frames(pipeline.read_rgba(data), 3, 3, 64, 64, 64)
@@ -431,7 +431,7 @@ class OptimizeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / 'repo'
             fixture(root)
-            (root / 'TwitchEmotes/Media/7tv/animation.tga').write_bytes(b'changed externally')
+            (root / 'TwitchEmotesFR/Media/7tv/animation.tga').write_bytes(b'changed externally')
             before = snapshot(root)
             with self.assertRaisesRegex(ValueError, 'hash'):
                 run(root)

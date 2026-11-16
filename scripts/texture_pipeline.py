@@ -446,7 +446,7 @@ def iter_sources(source, addon, tga):
             if archive is None:
                 archive = _archives[path] = zipfile.ZipFile(path)
             try:
-                yield archive.read('TwitchEmotes/' + tga)
+                yield archive.read('TwitchEmotesFR/' + tga)
             except KeyError:
                 pass
         else:

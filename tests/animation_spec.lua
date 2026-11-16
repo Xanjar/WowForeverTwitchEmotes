@@ -7,8 +7,8 @@ local function test(name,body)
     local ok,err=pcall(body)
     if ok then passed=passed+1 else failed=failed+1; print("FAIL "..name..": "..tostring(err)) end
 end
-local ANIMATION=os.getenv("TE_ANIMATION") or "TwitchEmotes/Animation.lua"
-local MEDIA="Interface\\AddOns\\TwitchEmotes\\Media\\"
+local ANIMATION=os.getenv("TE_ANIMATION") or "TwitchEmotesFR/Animation.lua"
+local MEDIA="Interface\\AddOns\\TwitchEmotesFR\\Media\\"
 
 local function setup()
     local world={time=0,tickers={}}
@@ -23,7 +23,7 @@ local function setup()
         world.tickers[#world.tickers+1]=ticker; return ticker
     end}
     local E={}
-    for _,path in ipairs({"TwitchEmotes/Core.lua","TwitchEmotes/Text.lua",ANIMATION}) do assert(loadfile(path))("TwitchEmotes",E) end
+    for _,path in ipairs({"TwitchEmotesFR/Core.lua","TwitchEmotesFR/Text.lua",ANIMATION}) do assert(loadfile(path))("TwitchEmotesFR",E) end
     E:RegisterPack({id="test",group="general",emotes={
         {name="KEKW",path=MEDIA.."kekw.tga",width=32,height=32,sheetWidth=32,sheetHeight=32,frames=1,fps=0},
         {name="catJAM",path=MEDIA.."cat.tga",width=32,height=32,sheetWidth=32,sheetHeight=128,frames=4,fps=10},
@@ -235,7 +235,7 @@ test("a line with more than 16 emotes shows still frames and never ticks",functi
     f:AddMessage(crowded); f:Update()
     local line=f.visibleLines[1]
     equal(w:Live(),0); equal(line.text,(E:AnimateText(crowded,nil)),"crowded line returns to frame 0")
-    local _,links=line.text:gsub("|Haddon:ForeverEmotes:",""); equal(links,128)
+    local _,links=line.text:gsub("|Haddon:TwitchEmotesFR:",""); equal(links,128)
     local writes=line.writes; w:Tick(0.6); equal(line.writes,writes)
     f:AddMessage(E:Transform(("W "):rep(17))); f:Update(); equal(w:Live(),0)
     f:AddMessage(E:Transform(("W "):rep(16))); f:Update(); equal(w:Live(),1)

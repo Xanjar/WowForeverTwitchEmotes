@@ -1,6 +1,6 @@
 """Cross-reference every global the runtime modules touch against each client's shipped Blizzard UI source.
 
-Usage: python3 -I scripts/api-xref.py TwitchEmotes <wowui-root> <out.json>
+Usage: python3 -I scripts/api-xref.py TwitchEmotesFR <wowui-root> <out.json>
 <wowui-root> holds one shallow clone of github.com/Gethe/wow-ui-source per branch, named after the branch
 (live, classic, classic_anniversary, classic_era, forever); each clone's version.txt names the build it mirrors.
 Prints one row per symbol with where each client defines it, flagging MISSING, and writes the full map to out.json."""

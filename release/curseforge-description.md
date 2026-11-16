@@ -8,7 +8,7 @@ The full collection includes **8,000+ emote names across 66 groups**, with artwo
 2. The first time you log in, the window opens on a channel picker: tick the groups you want and press Finish. General and five channel groups start ticked. Later, open it with **`/te`**, **`/twitch`**, or the minimap button.
 3. With the chat box open, click an emote in **Browse** to insert its name, or type `:` and part of a name for autocomplete with image previews. Up and Down move the highlight and Tab inserts the name; Enter always sends your message as typed.
 
-For manual installation, place the `TwitchEmotes` folder inside your client's `Interface/AddOns` folder and keep its name unchanged. The same folder works in every client. No companion addon or Twitch login is required.
+For manual installation, place the `TwitchEmotesFR` folder inside your client's `Interface/AddOns` folder and keep its name unchanged. The same folder works in every client. No companion addon or Twitch login is required.
 
 ## Browse and choose your collection
 

@@ -3,7 +3,7 @@
 local B = dofile("tests/ui_boundary.lua")
 local E = { title = "Twitch Emotes WoW Forever", version = "3.0.0", packs = {}, packOrder = { "global", "global2", "channel", "channel2" }, names = {} }
 E.db = { enabled = true, size = 22, animate = true, animationFPS = 20, minimap = true, minimapAngle = 220, packs = {}, channels = { CHAT_MSG_SAY = true }, favorites = {}, recent = {}, stats = {}, hidden = {} }
-for i = 1, 48 do E.names[i] = { name = string.format("Emote%02d", i), path = "Interface\\AddOns\\TwitchEmotes\\Media\\test.tga", width = 64, height = 32, frames = 1, sheetWidth = 64, sheetHeight = 32, provider = "7TV", creator = "A creator", packID = i <= 16 and "global" or (i <= 24 and "global2" or "channel") } end
+for i = 1, 48 do E.names[i] = { name = string.format("Emote%02d", i), path = "Interface\\AddOns\\TwitchEmotesFR\\Media\\test.tga", width = 64, height = 32, frames = 1, sheetWidth = 64, sheetHeight = 32, provider = "7TV", creator = "A creator", packID = i <= 16 and "global" or (i <= 24 and "global2" or "channel") } end
 E.packs.global = { id = "global", title = "Global", provider = "7TV" }
 E.packs.channel = { id = "channel", title = "Channel", provider = "BTTV" }
 E.packs.global2 = { id = "global2", title = "Global 2", provider = "BTTV" }
@@ -50,7 +50,7 @@ function E:Complete(text, cursor, limit)
 end
 -- Text.lua contract: a result whose visible bytes exceed the limit is refused with a nil position; the real counter
 -- is borrowed from Text.lua so markup in a draft is measured the way the shipped addon measures it.
-do local T = {}; loadfile("TwitchEmotes/Text.lua")("TwitchEmotes", T); E.VisibleTextBytes = T.VisibleTextBytes end
+do local T = {}; loadfile("TwitchEmotesFR/Text.lua")("TwitchEmotesFR", T); E.VisibleTextBytes = T.VisibleTextBytes end
 function E:ApplyCompletion(text, completion, name, limit)
     local result = text:sub(1, completion.first - 1) .. name .. text:sub(completion.last + 1)
     if limit and self:VisibleTextBytes(result) > limit then return text, nil end
@@ -60,10 +60,10 @@ end
 local tests, passed = {}, 0
 local function test(name, fn) tests[#tests + 1] = { name, fn } end
 local function equal(actual, expected, message) assert(actual == expected, (message or "value") .. ": expected " .. tostring(expected) .. ", got " .. tostring(actual)) end
-local function module(path) local loader = loadfile(path); if loader then loader("TwitchEmotes", E) end end
+local function module(path) local loader = loadfile(path); if loader then loader("TwitchEmotesFR", E) end end
 local function clean(message) assert(#B.violations == 0, (message or "addon touched Blizzard chat state") .. ": " .. table.concat(B.violations, ", ")) end
-module("TwitchEmotes/UI.lua"); module("TwitchEmotes/Completion.lua")
-local function suggest() return _G.ForeverEmotesSuggest end
+module("TwitchEmotesFR/UI.lua"); module("TwitchEmotesFR/Completion.lua")
+local function suggest() return _G.TwitchEmotesFRSuggest end
 local function suggesting() return suggest() ~= nil and suggest():IsShown() end
 
 test("first panel and menu opened in combat keep every key flowing", function()
@@ -155,7 +155,7 @@ test("first run opens the picker as a welcome with saved choices checked, and Fi
     E.db.packs.global = true; E.db.packs.global2 = true; E.db.packs.channel = false; E.db.packs.channel2 = false
     startFirstRun()
     equal(E.ui.panel:IsShown(), true); equal(E.ui.tab, "setup"); equal(E.ui.setupRows[1].group.id, "general")
-    equal(E.ui.setupTitle:GetText(), "Welcome to Twitch Emotes"); equal(E.ui.setupDone:GetText(), "Finish")
+    equal(E.ui.setupTitle:GetText(), "Welcome to Twitch Emotes FR"); equal(E.ui.setupDone:GetText(), "Finish")
     equal(E.ui.setupIntro:GetText(), "Emote names in chat show as images on your screen. Choose the channels whose emotes you want, then press Finish.")
     equal(E.ui.setupRows[1]:GetChecked(), true); equal(E.ui.setupRows[2]:GetChecked(), false)
     equal(E.ui.setupRows[1].detail:GetText(), "24 global emotes"); equal(E.ui.setupRows[2].detail:GetText(), "24 emotes")
@@ -166,7 +166,7 @@ test("first run opens the picker as a welcome with saved choices checked, and Fi
     B.type(E.ui.setupSearch, "for"); equal(E.ui.setupCount:GetText(), "1 found · 2 of 2 selected"); E.ui.setupSearch:SetText("")
     E.ui.setupDone:Click()
     equal(E.ui.panel:IsShown(), false); equal(E.db.setupComplete, true)
-    equal(#B.messages, 1); assert(B.messages[1]:find("Type /te and open Channels to change your channels later.", 1, true))
+    equal(#B.messages, 1); assert(B.messages[1]:find("Type /tefr and open Channels to change your channels later.", 1, true))
     equal(E:OpenFirstRun(), false, "a finished setup never opens it again"); equal(E.ui.panel:IsShown(), false)
 end)
 
@@ -182,7 +182,7 @@ test("closing the first-run picker any other way finishes it and says once where
     for _, closer in ipairs(closers) do
         startFirstRun(); closer[2]()
         equal(E.ui.panel:IsShown(), false, closer[1]); equal(E.db.setupComplete, true, closer[1]); equal(#B.messages, 1, closer[1])
-        assert(B.messages[1]:find("/te", 1, true), closer[1])
+        assert(B.messages[1]:find("/tefr", 1, true), closer[1])
         E:OpenPanel(); E.ui.panel:Hide(); equal(#B.messages, 1, closer[1] .. " prints the hint once")
     end
     -- A movie hides UIParent without closing windows: the engine fires OnHide on the panel, which stays shown.
@@ -546,7 +546,7 @@ end)
 
 test("minimap organizers find the native launcher by name and keep it once adopted", function()
     local control = E.ui.minimap
-    equal(control:GetName(), "TwitchEmotesMinimapButton"); equal(_G.TwitchEmotesMinimapButton, control)
+    equal(control:GetName(), "TwitchEmotesFRMinimapButton"); equal(_G.TwitchEmotesFRMinimapButton, control)
     local calls = { points = 0, shows = 0, hides = 0 }
     local setPoint, show, hide = control.SetPoint, control.Show, control.Hide
     control.SetPoint = function(self, ...) calls.points = calls.points + 1; return setPoint(self, ...) end
@@ -609,17 +609,17 @@ local function freshAddon(minimap)
     local addon = {}
     for key, value in pairs(E) do if key ~= "ui" then addon[key] = value end end
     addon.db = { enabled = true, size = 22, animate = true, animationFPS = 20, minimap = minimap ~= false, minimapAngle = 220, packs = {}, channels = { CHAT_MSG_SAY = true }, favorites = {}, recent = {}, stats = {}, hidden = {} }
-    assert(loadfile("TwitchEmotes/UI.lua"))("TwitchEmotes", addon)
+    assert(loadfile("TwitchEmotesFR/UI.lua"))("TwitchEmotesFR", addon)
     return addon
 end
 
 test("with LibDBIcon loaded the launcher registers there and leaves placement to it and to organizers", function()
     withLibraries(false, function(broker, icons, calls)
         local addon = freshAddon(); addon:InitializeUI()
-        local control = icons.buttons.TwitchEmotes
+        local control = icons.buttons.TwitchEmotesFR
         assert(control, "the launcher must register with LibDBIcon"); equal(addon.ui.minimap, control)
-        local object = broker.objects.TwitchEmotes
-        equal(object.type, "launcher"); equal(object.label, addon.title); equal(object.icon, "Interface\\AddOns\\TwitchEmotes\\Media\\UI\\TwitchGlitch.tga")
+        local object = broker.objects.TwitchEmotesFR
+        equal(object.type, "launcher"); equal(object.label, addon.title); equal(object.icon, "Interface\\AddOns\\TwitchEmotesFR\\Media\\UI\\TwitchGlitch.tga")
         local tooltip = { lines = {} }
         function tooltip:AddLine(text) self.lines[#self.lines + 1] = text end
         object.OnTooltipShow(tooltip); equal(tooltip.lines[1], addon.title); equal(#tooltip.lines, 2)
@@ -644,14 +644,14 @@ test("with LibDBIcon loaded the launcher registers there and leaves placement to
         control:Click(); equal(addon.ui.panel:IsShown(), true); addon.ui.panel:Hide()
         -- With the name already taken, a second copy keeps a named native button instead of failing.
         local second = freshAddon(); second:InitializeUI()
-        equal(second.ui.minimap:GetName(), "TwitchEmotesMinimapButton"); equal(second.ui.minimapIcons, nil)
+        equal(second.ui.minimap:GetName(), "TwitchEmotesFRMinimapButton"); equal(second.ui.minimapIcons, nil)
     end)
 end)
 
 test("an older LibDBIcon that defers a hidden button still yields one launcher, hidden until the setting is on", function()
     withLibraries(true, function(_, icons)
         local addon = freshAddon(false); addon:InitializeUI()
-        local control = icons.buttons.TwitchEmotes
+        local control = icons.buttons.TwitchEmotesFR
         assert(control, "the deferred button must be built"); equal(addon.ui.minimap, control); equal(addon.ui.minimapIcons, icons)
         equal(control:IsShown(), false)
         addon:SetOption("minimap", true); equal(control:IsShown(), true)
@@ -662,7 +662,7 @@ test("the first-run picker can be the first window a session builds", function()
     local addon = freshAddon(); B.messages = {}
     assert(addon:OpenFirstRun()); equal(addon.ui.panel:IsShown(), true)
     equal(addon.db.setupComplete, nil, "building the window does not count as closing it"); equal(#B.messages, 0)
-    equal(addon.ui.setupTitle:GetText(), "Welcome to Twitch Emotes")
+    equal(addon.ui.setupTitle:GetText(), "Welcome to Twitch Emotes FR")
     addon.ui.panel:Hide(); equal(addon.db.setupComplete, true); equal(#B.messages, 1)
 end)
 

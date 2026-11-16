@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 TheMizeGuy. All rights reserved.
-"""Build provider-sourced emote packs for TwitchEmotes.
+"""Build provider-sourced emote packs for TwitchEmotesFR.
 
 Requires Pillow. Use --all for every bundled channel and global catalog, or
 --login CHANNEL --pack NAME for a 7TV channel. The --provider option also
@@ -34,7 +34,7 @@ MAX_SHEET_SIZE = 2048
 MAX_FRAMES = 256
 MAX_FPS = 60
 MAX_DOWNLOAD_BYTES = 64 * 1024 * 1024
-USER_AGENT = 'TwitchEmotes/3.0 (+https://github.com/TheMizeGuy/WowForeverTwitchEmotes)'
+USER_AGENT = 'TwitchEmotesFR/3.0 (+https://github.com/TheMizeGuy/WowForeverTwitchEmotes)'
 PROVIDER_LABELS = {'7tv': '7TV', 'bttv': 'BTTV', 'ffz': 'FFZ', 'twitch': 'Twitch'}
 CDN_HOSTS = {'7tv': 'cdn.7tv.app', 'bttv': 'cdn.betterttv.net', 'ffz': 'cdn.frankerfacez.com',
              'twitch': 'static-cdn.jtvnw.net'}
@@ -44,18 +44,17 @@ GLOBAL_APIS = {
     'ffz-global': 'https://api.frankerfacez.com/v1/set/global',
 }
 CHANNEL_IDS = {
-    'graycen': '25743612', 'erobb221': '96858382', 'ahlaundoh': '32093909',
-    'summit1g': '26490481', 'ziqoftw': '20567961', 'xaryu': '32085830',
-    'pikabooirl': '27992608', 'swifty': '23524577', 'payo': '59624901',
+    'kamet0': '27115917', 'locklear': '137347549', 'mynthos': '28585164', 'gotaga': '24147592',
+    'doigby': '25454398', 'zerator': '41719107', 'etoiles': '85800130', 'botkz': '61582473',
+    'hiro_llol': '223046106',
 }
+# French edition: the French streamer channels, each from its 7TV emote set.
 BUNDLED_7TV_CHANNELS = (
-    ('graycen', 'Graycen', 20), ('erobb221', 'erobb221', 30),
-    ('ahlaundoh', 'Ahlaundoh', 20), ('summit1g', 'summit1g', 20),
-    ('ziqoftw', 'Ziqoftw', 20), ('xaryu', 'Xaryu', 20),
+    ('kamet0', 'Kameto', 20), ('locklear', 'Locklear', 20), ('mynthos', 'Mynthos', 20),
+    ('gotaga', 'Gotaga', 20), ('doigby', 'Doigby', 20), ('zerator', 'ZeratoR', 20),
+    ('etoiles', 'Etoiles', 20), ('botkz', 'Botkz', 20), ('hiro_llol', 'Hiro', 20),
 )
-BUNDLED_FALLBACKS = (('bttv', 'pikabooirl', 'Pikabooirl'),
-                     ('ffz', 'pikabooirl', 'Pikabooirl'), ('bttv', 'swifty', 'Swifty'),
-                     ('bttv', 'payo', 'Payo'))
+BUNDLED_FALLBACKS = ()
 ASSET_FIELDS = ('width', 'height', 'frames', 'fps', 'cellWidth', 'columns', 'sheetWidth', 'sheetHeight',
                 'source_width', 'source_height', 'source_frames', 'duration_ms', 'source_duration_ms',
                 'timing_normalized', 'sequence', 'lossless', 'texture', 'source_sha256', 'texture_sha256')
@@ -403,7 +402,7 @@ def render_lua(pack, records):
             values['sequence'] = steps
         values.update((key, record[key]) for key in ('cellWidth', 'columns', 'sheetWidth', 'sheetHeight',
                                                      'creator', 'source'))
-        values['path'] = 'Interface\\AddOns\\TwitchEmotes\\' + record['texture'].replace('/', '\\')
+        values['path'] = 'Interface\\AddOns\\TwitchEmotesFR\\' + record['texture'].replace('/', '\\')
         lines.append('    { ' + ', '.join(f'{key} = {literal(value)}' for key, value in values.items()) + ' },')
     lines.extend(['  },', '})', ''])
     return '\n'.join(lines)
@@ -655,7 +654,7 @@ def main():
     parser.add_argument('--pack')
     parser.add_argument('--title')
     parser.add_argument('--priority', type=int, default=20)
-    parser.add_argument('--addon-dir', type=Path, default=root / 'TwitchEmotes')
+    parser.add_argument('--addon-dir', type=Path, default=root / 'TwitchEmotesFR')
     parser.add_argument('--manifest-dir', type=Path, default=root / 'packs')
     parser.add_argument('--cache-dir', type=Path, default=root / '.cache' / '7tv')
     parser.add_argument('--max-frames', type=int, default=MAX_FRAMES)
@@ -667,7 +666,8 @@ def main():
                   for login, title, priority in BUNDLED_7TV_CHANNELS]
         packs += [fetch_provider_channel(provider, login, title)
                   for provider, login, title in BUNDLED_FALLBACKS]
-        packs += fetch_native_catalogs(root / 'scripts' / 'twitch-channels.json', args.workers)
+        # French edition: Twitch's own global emotes only; native channel catalogs are not bundled.
+        packs.append(fetch_global('twitch-global'))
     elif args.provider.endswith('-global'):
         packs = [fetch_global(args.provider)]
     elif args.provider != '7tv':

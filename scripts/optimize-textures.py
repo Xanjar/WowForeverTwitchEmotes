@@ -33,8 +33,8 @@ LOSSLESS = ('width', 'height', 'frames', 'cellWidth', 'columns', 'sheetWidth', '
 DEFAULT_HEIGHTS = (64, 48, 40, 32)
 DEFAULT_MERGES = (3, 5, 8)
 DEFAULT_FLOOR = 0.85
-BASELINE_ZIP = 'TwitchEmotes-3.0.0-tga-baseline.zip'
-BASELINE_DIRS = (Path('/Users/mize/Dev/WowAddons/.worktrees/TwitchEmotes-original/dist'),)
+BASELINE_ZIP = 'TwitchEmotesFR-3.0.0-tga-baseline.zip'
+BASELINE_DIRS = (Path('/Users/mize/Dev/WowAddons/.worktrees/TwitchEmotesFR-original/dist'),)
 TEXTURE_PATTERN = r'Media/(7tv|bttv|ffz|twitch)/[A-Za-z0-9][A-Za-z0-9_-]*\.(tga|blp)'
 
 
@@ -66,7 +66,7 @@ def default_source(root):
     for directory in (root / 'dist',) + BASELINE_DIRS:
         if (directory / BASELINE_ZIP).is_file():
             return directory / BASELINE_ZIP
-    return root / 'TwitchEmotes' / 'Media'
+    return root / 'TwitchEmotesFR' / 'Media'
 
 
 def source_spec(path):
@@ -79,7 +79,7 @@ def source_spec(path):
 
 
 def load_manifests(root):
-    addon = root / 'TwitchEmotes'
+    addon = root / 'TwitchEmotesFR'
     manifests, entries = {}, {}
     for path in sorted((root / 'packs').glob('*.json')):
         pack = json.loads(path.read_text(encoding='utf-8'))
@@ -169,7 +169,7 @@ def optimize(root, source=None, budget=0, heights=DEFAULT_HEIGHTS, hold=3, near=
     if not 0 <= floor <= 1:
         raise ValueError('floor must be within 0..1')
     root = Path(root).resolve()
-    addon = root / 'TwitchEmotes'
+    addon = root / 'TwitchEmotesFR'
     cache = Path(cache) if cache else root / '.cache' / 'optimize'
     source = source_spec(source if source else default_source(root))
     manifests, entries = load_manifests(root)

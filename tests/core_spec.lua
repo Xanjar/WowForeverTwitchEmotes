@@ -10,26 +10,26 @@ end
 local function loadEngine()
     local E = {}
     for _, name in ipairs({"Core", "Text"}) do
-        local file = "TwitchEmotes/" .. name .. ".lua"
+        local file = "TwitchEmotesFR/" .. name .. ".lua"
         local chunk = loadfile(file)
         assert(chunk, "original " .. name .. " module has not been implemented")
-        chunk("TwitchEmotes", E)
+        chunk("TwitchEmotesFR", E)
     end
     E:InitializeDB()
     return E
 end
 local function entry(name, path, frames)
-    return {name = name, path = path or "Interface\\AddOns\\TwitchEmotes\\Media\\test.tga",
+    return {name = name, path = path or "Interface\\AddOns\\TwitchEmotesFR\\Media\\test.tga",
         width = 64, height = 32, sheetWidth = 64, sheetHeight = frames and 128 or 32,
         frames = frames or 1, fps = frames and 10 or 0, creator = "Artist", source = "https://7tv.app/emotes/test"}
 end
 local function realPacks()
     local E = loadEngine()
-    for line in io.lines("TwitchEmotes/TwitchEmotes.toc") do
+    for line in io.lines("TwitchEmotesFR/TwitchEmotesFR.toc") do
         local file = line:gsub("\r", ""):match("^Packs\\([%w_%-]+%.lua)$")
-        if file then assert(loadfile("TwitchEmotes/Packs/" .. file))("TwitchEmotes", E) end
+        if file then assert(loadfile("TwitchEmotesFR/Packs/" .. file))("TwitchEmotesFR", E) end
     end
-    assert(#E.packOrder > 50, "expected the shipped packs")
+    assert(#E.packOrder >= 13, "expected the shipped packs")
     E:PrepareSetup(); E:RebuildCatalog()
     return E
 end
@@ -44,13 +44,13 @@ end
 test("module loads engine implementation", function() assert(loadEngine().Transform) end)
 test("higher priority enabled pack wins and disabling reveals lower pack", function()
     local E = setup()
-    E:RegisterPack({id="channel", priority=20, emotes={entry("KEKW", "Interface\\AddOns\\TwitchEmotes\\Media\\other.tga")}})
+    E:RegisterPack({id="channel", priority=20, emotes={entry("KEKW", "Interface\\AddOns\\TwitchEmotesFR\\Media\\other.tga")}})
     E:RebuildCatalog(); equal(E:GetEmote("KEKW").packID, "channel")
     E:SetPackEnabled("channel", false); equal(E:GetEmote("KEKW").packID, "base")
 end)
 test("pack validation rejects unsafe paths names and impossible sheets", function()
     local E = setup()
-    for _, bad in ipairs({entry("bad name"), entry("bad|name"), entry("bad", "..\\outside.tga"), entry("bad", "Interface\\AddOns\\TwitchEmotes\\Media\\ok.tga|t")}) do
+    for _, bad in ipairs({entry("bad name"), entry("bad|name"), entry("bad", "..\\outside.tga"), entry("bad", "Interface\\AddOns\\TwitchEmotesFR\\Media\\ok.tga|t")}) do
         assert(not pcall(function() E:RegisterPack({id="unsafe",emotes={bad}}) end))
     end
     local bad = entry("bad", nil, 4); bad.sheetHeight=32
@@ -63,13 +63,13 @@ test("newer registration at equal priority wins deterministically", function()
 end)
 test("render preserves wide aspect ratio and samples animation at elapsed time", function()
     local E=setup()
-    equal(E:Render(E:GetEmote("KEKW"),20,nil,false),"|TInterface\\AddOns\\TwitchEmotes\\Media\\test.tga:20:40:0:0:64:32:0:64:0:32|t")
-    equal(E:Render(E:GetEmote("catJAM"),20,0.25,false),"|TInterface\\AddOns\\TwitchEmotes\\Media\\test.tga:20:40:0:0:64:128:0:64:64:96|t")
-    equal(E:Render(E:GetEmote("catJAM"),20,0.45,false),"|TInterface\\AddOns\\TwitchEmotes\\Media\\test.tga:20:40:0:0:64:128:0:64:0:32|t")
+    equal(E:Render(E:GetEmote("KEKW"),20,nil,false),"|TInterface\\AddOns\\TwitchEmotesFR\\Media\\test.tga:20:40:0:0:64:32:0:64:0:32|t")
+    equal(E:Render(E:GetEmote("catJAM"),20,0.25,false),"|TInterface\\AddOns\\TwitchEmotesFR\\Media\\test.tga:20:40:0:0:64:128:0:64:64:96|t")
+    equal(E:Render(E:GetEmote("catJAM"),20,0.45,false),"|TInterface\\AddOns\\TwitchEmotesFR\\Media\\test.tga:20:40:0:0:64:128:0:64:0:32|t")
 end)
 test("BLP sheets retain the same animation crop and strict path validation", function()
     local E=setup()
-    local path="Interface\\AddOns\\TwitchEmotes\\Media\\7tv\\compressed.blp"
+    local path="Interface\\AddOns\\TwitchEmotesFR\\Media\\7tv\\compressed.blp"
     E:RegisterPack({id="compressed",emotes={entry("compressed",path,4)}}); E:RebuildCatalog()
     equal(E:Render(E:GetEmote("compressed"),20,0.25,false),"|T"..path..":20:40:0:0:64:128:0:64:64:96|t")
     for _, bad in ipairs({path.."|t",path..".tga",path:gsub("%.blp$",".png"),path:gsub("compressed","..\\compressed")}) do
@@ -205,10 +205,10 @@ end)
 
 test("high resolution sprite grids crop columns and rows precisely", function()
     local E=setup()
-    E:RegisterPack({id="hd",emotes={{name="HD",path="Interface\\AddOns\\TwitchEmotes\\Media\\hd.tga",width=96,height=64,
+    E:RegisterPack({id="hd",emotes={{name="HD",path="Interface\\AddOns\\TwitchEmotesFR\\Media\\hd.tga",width=96,height=64,
         cellWidth=128,columns=8,frames=128,fps=60,sheetWidth=1024,sheetHeight=1024}}})
     E:RebuildCatalog()
-    equal(E:Render(E:GetEmote("HD"),24,10/60,false),"|TInterface\\AddOns\\TwitchEmotes\\Media\\hd.tga:24:36:0:0:1024:1024:256:352:64:128|t")
+    equal(E:Render(E:GetEmote("HD"),24,10/60,false),"|TInterface\\AddOns\\TwitchEmotesFR\\Media\\hd.tga:24:36:0:0:1024:1024:256:352:64:128|t")
     E:SetOption("animationFPS",60); equal(E.db.animationFPS,60)
 end)
 test("invalid grid bounds fail before registration", function()
@@ -217,7 +217,7 @@ test("invalid grid bounds fail before registration", function()
 end)
 
 test("a frame sequence replays stored cells in the recorded order", function()
-    local E=setup(); local path="Interface\\AddOns\\TwitchEmotes\\Media\\seq.tga"
+    local E=setup(); local path="Interface\\AddOns\\TwitchEmotesFR\\Media\\seq.tga"
     E:RegisterPack({id="seq",emotes={{name="seqJAM",path=path,width=64,height=32,cellWidth=64,columns=1,
         frames=3,fps=10,sheetWidth=64,sheetHeight=128,sequence="\000\001\001\002"}}})
     E:RebuildCatalog(); local seqJAM=E:GetEmote("seqJAM")
@@ -227,7 +227,7 @@ test("a frame sequence replays stored cells in the recorded order", function()
     equal(E:Render(seqJAM,20,0.45,false),cell(0))
 end)
 test("frame heights other than 64 crop rows and scale width from the frame aspect", function()
-    local E=setup(); local path="Interface\\AddOns\\TwitchEmotes\\Media\\short.tga"
+    local E=setup(); local path="Interface\\AddOns\\TwitchEmotesFR\\Media\\short.tga"
     E:RegisterPack({id="short",emotes={{name="shortJAM",path=path,width=80,height=40,cellWidth=128,columns=2,
         frames=3,fps=10,sheetWidth=256,sheetHeight=128}}})
     E:RebuildCatalog(); local shortJAM=E:GetEmote("shortJAM")
@@ -266,20 +266,20 @@ end)
 test("missing settings enable the release channels without overwriting saved choices", function()
     local E=loadEngine()
     E:RegisterPack({id="bttv_global",emotes={entry("Kappa")}})
-    for _,id in ipairs({"graycen","forsen","erobb221","xqc","asmongold","xaryu"}) do
+    for _,id in ipairs({"kamet0","locklear","mynthos","gotaga","doigby","zerator","etoiles","botkz","hiro_llol","xaryu"}) do
         E:RegisterPack({id=id,emotes={entry(id.."Emote")}})
     end
     E:PrepareSetup(); E:RebuildCatalog()
     assert(E:GetEmote("Kappa")); equal(E:GetEmote("xaryuEmote"),nil)
-    for _,id in ipairs({"graycen","forsen","erobb221","xqc","asmongold"}) do assert(E:GetEmote(id.."Emote"),id.." must start enabled") end
-    E:SetGroupEnabled("forsen",false); E:SetGroupEnabled("xaryu",true)
+    for _,id in ipairs({"kamet0","locklear","mynthos","gotaga","doigby","zerator","etoiles","botkz","hiro_llol"}) do assert(E:GetEmote(id.."Emote"),id.." must start enabled") end
+    E:SetGroupEnabled("kamet0",false); E:SetGroupEnabled("xaryu",true)
     E:InitializeDB(E.db); E:PrepareSetup(); E:RebuildCatalog()
-    equal(E:GetEmote("forsenEmote"),nil); assert(E:GetEmote("xaryuEmote"))
+    equal(E:GetEmote("kamet0Emote"),nil); assert(E:GetEmote("xaryuEmote"))
     E:SetOption("setupComplete",true); equal(E.db.setupComplete,true)
 end)
 test("preferred channel wins overlaps and disabled groups relinquish names", function()
     local E=setup()
-    E:RegisterPack({id="forsen",priority=20,emotes={entry("KEKW","Interface\\AddOns\\TwitchEmotes\\Media\\forsen.tga")}})
+    E:RegisterPack({id="forsen",priority=20,emotes={entry("KEKW","Interface\\AddOns\\TwitchEmotesFR\\Media\\forsen.tga")}})
     E:RebuildCatalog(); equal(E:GetEmote("KEKW").packID,"forsen")
     E:SetOption("preferredGroup","base"); equal(E:GetEmote("KEKW").packID,"base")
     E:SetGroupEnabled("base",false); equal(E:GetEmote("KEKW").packID,"forsen")
@@ -288,7 +288,7 @@ end)
 
 test("the lookup that includes disabled packs shows the art chat shows", function()
     local E=loadEngine()
-    local general,channel="Interface\\AddOns\\TwitchEmotes\\Media\\general.tga","Interface\\AddOns\\TwitchEmotes\\Media\\channel.tga"
+    local general,channel="Interface\\AddOns\\TwitchEmotesFR\\Media\\general.tga","Interface\\AddOns\\TwitchEmotesFR\\Media\\channel.tga"
     E:RegisterPack({id="seventv_global",priority=12,emotes={entry("AYAYA",general)}})
     E:RegisterPack({id="channel",priority=20,emotes={entry("AYAYA",channel),entry("exclusive")}})
     E.db.packs.seventv_global=true; E.db.packs.channel=false; E:RebuildCatalog()
@@ -350,7 +350,7 @@ test("choices for a name that leaves every pack survive until it returns", funct
     local function session(saved,names)
         local E=loadEngine(); local entries={}
         for _,name in ipairs(names) do entries[#entries+1]=entry(name) end
-        E:RegisterPack({id="graycen",emotes=entries}); E:InitializeDB(saved); E:PrepareSetup(); E:RebuildCatalog()
+        E:RegisterPack({id="kamet0",emotes=entries}); E:InitializeDB(saved); E:PrepareSetup(); E:RebuildCatalog()
         return E
     end
     local E=session(nil,{"Retail","KEKW","Kappa"}); assert(E:IsEmoteHidden("Retail"))

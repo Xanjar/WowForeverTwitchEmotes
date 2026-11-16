@@ -9,13 +9,13 @@ local function test(name, body)
 end
 local LONG = "ThisSeemsLikeItWouldFit" .. string.rep("x", 77)
 local function entry(name, frames)
-    return {name = name, path = "Interface\\AddOns\\TwitchEmotes\\Media\\test.tga",
+    return {name = name, path = "Interface\\AddOns\\TwitchEmotesFR\\Media\\test.tga",
         width = 64, height = 32, sheetWidth = 64, sheetHeight = frames and 128 or 32,
         frames = frames or 1, fps = frames and 10 or 0}
 end
 local function setup()
     local E = {}
-    for _, name in ipairs({"Core", "Text"}) do assert(loadfile("TwitchEmotes/" .. name .. ".lua"))("TwitchEmotes", E) end
+    for _, name in ipairs({"Core", "Text"}) do assert(loadfile("TwitchEmotesFR/" .. name .. ".lua"))("TwitchEmotesFR", E) end
     E:InitializeDB()
     local emotes = {}
     for _, name in ipairs({"KEKW", "Kappa", "!spin", "forsen", "Clap", "???", "Me:", "(7TV)", ":tf:", ":3", "PagBounce", "dada", "o7", "L", LONG}) do

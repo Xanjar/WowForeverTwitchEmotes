@@ -5,7 +5,7 @@ local B = dofile(testDirectory .. "ui_boundary.lua")
 local args = {}
 for i = B.profileArgument(arg[1]) and 2 or 1, #arg do args[#args + 1] = arg[i] end
 local root = args[1] or "."
-local addonDirectory = root .. "/TwitchEmotes"
+local addonDirectory = root .. "/TwitchEmotesFR"
 local packsDirectory = args[2] or addonDirectory .. "/Packs"
 local mediaDirectory = packsDirectory:gsub("/Packs/?$", "")
 local E, passed, failed = {}, 0, 0
@@ -31,20 +31,20 @@ B.chats = { chat }
 
 -- Read only the declared modules, and reject unexpected TOC entries before loading.
 local modules = { ["Core.lua"] = true, ["Text.lua"] = true, ["UI.lua"] = true, ["Completion.lua"] = true, ["Animation.lua"] = true, ["Runtime.lua"] = true }
-local expectedPacks = { "bttv_global", "ffz_global", "seventv_global", "graycen", "erobb221" }
+local expectedPacks = { "bttv_global", "ffz_global", "seventv_global", "twitch_global", "kamet0", "hiro_llol" }
 for _, id in ipairs(expectedPacks) do modules["Packs/" .. id .. ".lua"] = true end
 -- One manifest per game type plus the Mainline family fallback, which retail (Standard) and Forever (Camelot) read
 -- only when their own manifest is missing, so it carries both numbers. Titles name the game version.
 local manifests = {
-    ["TwitchEmotes.toc"] = "120105, 50504, 20506, 11509, 16001", ["TwitchEmotes_Mainline.toc"] = "120105, 16001",
-    ["TwitchEmotes_Standard.toc"] = "120105", ["TwitchEmotes_Camelot.toc"] = "16001",
-    ["TwitchEmotes_Mists.toc"] = "50504", ["TwitchEmotes_TBC.toc"] = "20506", ["TwitchEmotes_Vanilla.toc"] = "11509",
+    ["TwitchEmotesFR.toc"] = "120105, 50504, 20506, 11509, 16001", ["TwitchEmotesFR_Mainline.toc"] = "120105, 16001",
+    ["TwitchEmotesFR_Standard.toc"] = "120105", ["TwitchEmotesFR_Camelot.toc"] = "16001",
+    ["TwitchEmotesFR_Mists.toc"] = "50504", ["TwitchEmotesFR_TBC.toc"] = "20506", ["TwitchEmotesFR_Vanilla.toc"] = "11509",
 }
 local titles = {
-    ["TwitchEmotes.toc"] = "Twitch Emotes", ["TwitchEmotes_Mainline.toc"] = "Twitch Emotes",
-    ["TwitchEmotes_Standard.toc"] = "Twitch Emotes (Retail)", ["TwitchEmotes_Camelot.toc"] = "Twitch Emotes (WoW Forever)",
-    ["TwitchEmotes_Mists.toc"] = "Twitch Emotes (Mists Classic)", ["TwitchEmotes_TBC.toc"] = "Twitch Emotes (TBC Anniversary)",
-    ["TwitchEmotes_Vanilla.toc"] = "Twitch Emotes (Classic Era)",
+    ["TwitchEmotesFR.toc"] = "Twitch Emotes FR", ["TwitchEmotesFR_Mainline.toc"] = "Twitch Emotes FR",
+    ["TwitchEmotesFR_Standard.toc"] = "Twitch Emotes FR (Retail)", ["TwitchEmotesFR_Camelot.toc"] = "Twitch Emotes FR (WoW Forever)",
+    ["TwitchEmotesFR_Mists.toc"] = "Twitch Emotes FR (Mists Classic)", ["TwitchEmotesFR_TBC.toc"] = "Twitch Emotes FR (TBC Anniversary)",
+    ["TwitchEmotesFR_Vanilla.toc"] = "Twitch Emotes FR (Classic Era)",
 }
 local function readManifest(name)
     local toc = assert(io.open(addonDirectory .. "/" .. name, "r"))
@@ -60,9 +60,9 @@ local function readManifest(name)
     toc:close()
     return list, interface
 end
-local reference = readManifest("TwitchEmotes_Mainline.toc")
+local reference = readManifest("TwitchEmotesFR_Mainline.toc")
 -- Classic clients (Era here) read their own manifest; retail and Forever read Mainline.
-local files, packFiles = readManifest(B.mainline and "TwitchEmotes_Mainline.toc" or "TwitchEmotes_Vanilla.toc"), {}
+local files, packFiles = readManifest(B.mainline and "TwitchEmotesFR_Mainline.toc" or "TwitchEmotesFR_Vanilla.toc"), {}
 for _, line in ipairs(files) do if line:sub(1, 6) == "Packs/" then packFiles[#packFiles + 1] = line end end
 for name, expectedInterface in pairs(manifests) do
     local list, interface = readManifest(name)
@@ -73,19 +73,19 @@ local loaded = {}
 for _, path in ipairs(files) do
     assert(not loaded[path], "Duplicate TOC module: " .. path)
     local absolute = path:sub(1, 6) == "Packs/" and (packsDirectory .. "/" .. path:sub(7)) or (addonDirectory .. "/" .. path)
-    assert(loadfile(absolute))("TwitchEmotes", E); loaded[path] = true
+    assert(loadfile(absolute))("TwitchEmotesFR", E); loaded[path] = true
 end
 for path in pairs(modules) do assert(loaded[path], "Missing TOC module: " .. path) end
 equal(#E.packOrder, #packFiles, "every declared provider/channel pack loaded")
 for _, id in ipairs(expectedPacks) do assert(E.packs[id], "missing provider/channel pack: " .. id) end
 
 local seed = assert(E.packs.bttv_global.emotes[1], "BTTV global pack is empty")
-_G.ForeverEmotesDB = nil
+_G.TwitchEmotesFRDB = nil
 _G.Emoticons_Settings = { LARGEEMOTES = true, MINIMAPBUTTON = false }
 _G.TwitchEmoteStatistics = { [seed.name] = { "legacy", 5, 7 } }
 B.event("ADDON_LOADED", "AnotherAddon")
 equal(E.db, nil, "unrelated addon load does not initialize state")
-B.event("ADDON_LOADED", "TwitchEmotes")
+B.event("ADDON_LOADED", "TwitchEmotesFR")
 B.event("PLAYER_LOGIN")
 local panelShownAtLogin = E.ui.panel and E.ui.panel:IsShown()
 B.event("PLAYER_ENTERING_WORLD", true, false)
@@ -109,50 +109,49 @@ test("every manifest persists only the native database, matches the runtime vers
     for name in pairs(manifests) do
         local file=assert(io.open(addonDirectory.."/"..name,"r"))
         local text=file:read("*a"); file:close()
-        equal(text:match("## SavedVariables: ([^\r\n]+)"),"ForeverEmotesDB")
+        equal(text:match("## SavedVariables: ([^\r\n]+)"),"TwitchEmotesFRDB")
         equal(text:match("## Version: ([^\r\n]+)"),E.version)
         equal(text:match("## Title: ([^\r\n]+)"),titles[name],name)
     end
 end)
 
 test("actual startup ignores legacy saved globals and initializes once", function()
-    equal(E.db, ForeverEmotesDB); equal(E.db.size, 28); equal(E.db.minimap, true)
+    equal(E.db, TwitchEmotesFRDB); equal(E.db.size, 28); equal(E.db.minimap, true)
     equal(E:Stats(seed.name).sent, 0); equal(E:Stats(seed.name).seen, 0)
     equal(Emoticons_Settings.MINIMAPBUTTON,false); equal(TwitchEmoteStatistics[seed.name][2],5)
     assert(#E.names > 50, "expected real provider catalog")
     assert(not panelShownAtLogin, "startup must not open a configuration window")
     assert(not E.ui.panel or not E.ui.panel:IsShown(), "nothing opens under the loading screen")
-    local defaults = { general=true, graycen=true, forsen=true, erobb221=true, xqc=true, asmongold=true }
+    local defaults = { general=true, kamet0=true, locklear=true, mynthos=true, gotaga=true, doigby=true, zerator=true, etoiles=true, botkz=true, hiro_llol=true }
     local enabledGroups = {}
     for _, id in ipairs(E.packOrder) do
         local group = E.packs[id].group
         equal(E.db.packs[id], defaults[group] == true, "release default for " .. id)
         if E.db.packs[id] then enabledGroups[group] = true end
     end
-    equal(count(enabledGroups), 6, "all requested groups exist and start enabled")
+    equal(count(enabledGroups), 10, "all requested groups exist and start enabled")
     B.event("PLAYER_LOGIN"); equal(B.categories, 1); equal(#B.filters.CHAT_MSG_SAY, 1)
     equal(#chat.displayCallbacks, 1); equal(B.liveTickers(), 0)
-    SlashCmdList.FOREVEREMOTES(""); assert(E.ui.panel:IsShown())
+    SlashCmdList.TWITCHEMOTESFR(""); assert(E.ui.panel:IsShown())
 end)
 
-test("the first-run picker opens after the loading screen with the release defaults and the Payo group off", function()
+test("the first-run picker opens after the loading screen with every French channel on", function()
     E.ui.panel:Hide(); equal(E.db.setupComplete, false)
     B.event("LOADING_SCREEN_DISABLED"); B.nextFrame()
     assert(E.ui.panel:IsShown(), "the picker opens once the loading screen lifts")
-    equal(E.ui.tab, "setup"); equal(E.ui.setupTitle:GetText(), "Welcome to Twitch Emotes")
-    equal(E.ui.setupCount:GetText(), "6 of " .. #E:GetGroups() .. " selected")
-    B.type(E.ui.setupSearch, "Payo")
+    equal(E.ui.tab, "setup"); equal(E.ui.setupTitle:GetText(), "Welcome to Twitch Emotes FR")
+    equal(E.ui.setupCount:GetText(), "10 of " .. #E:GetGroups() .. " selected")
+    B.type(E.ui.setupSearch, "Kameto")
     local row = E.ui.setupRows[1]
-    equal(row.Text:GetText(), "Payo"); equal(row:GetChecked(), false); equal(E.ui.setupRows[2]:IsShown(), false)
-    equal(row.detail:GetText(), "564 emotes")
-    assert(row.samples:GetText():find("Media\\twitch\\", 1, true), "a channel's samples are its own Twitch emotes")
-    equal(E.db.packs.bttv_payo, false); equal(E.db.packs.twitch_payo, false)
-    row:Click(); equal(E.db.packs.bttv_payo, true); equal(E.db.packs.twitch_payo, true)
-    assert(E:GetEmote("payoKey") and E:GetEmote("payoGG"), "both Payo packs supply names once the group is ticked")
-    row:Click(); equal(E:GetEmote("payoKey"), nil)
+    equal(row.Text:GetText(), "Kameto"); equal(row:GetChecked(), true); equal(E.ui.setupRows[2]:IsShown(), false)
+    equal(row.detail:GetText(), "666 emotes")
+    assert(row.samples:GetText():find("Media\\7tv\\", 1, true), "a channel's samples are its own 7TV emotes")
+    equal(E.db.packs.kamet0, true); assert(E:GetEmote("Binanas"), "Kameto's emotes start enabled")
+    row:Click(); equal(E.db.packs.kamet0, false); equal(E:GetEmote("Binanas"), nil)
+    row:Click(); equal(E.db.packs.kamet0, true); assert(E:GetEmote("Binanas"))
     E.ui.setupSearch:SetText(""); E.ui.setupDone:Click()
     equal(E.ui.panel:IsShown(), false); equal(E.db.setupComplete, true)
-    SlashCmdList.FOREVEREMOTES(""); assert(E.ui.panel:IsShown())
+    SlashCmdList.TWITCHEMOTESFR(""); assert(E.ui.panel:IsShown())
 end)
 
 test("real picker search, favorites and insertion share the active catalog", function()
@@ -169,7 +168,7 @@ test("real picker search, favorites and insertion share the active catalog", fun
     B.find("All"):Click(); E.ui.search:SetText("")
 end)
 
-local function suggest() return _G.ForeverEmotesSuggest end
+local function suggest() return _G.TwitchEmotesFRSuggest end
 local function suggesting() return suggest() ~= nil and suggest():IsShown() end
 
 test("real completion uses byte spans, Tab applies and the shared Blizzard box stays closed", function()
@@ -229,7 +228,7 @@ test("display filters preserve callback arguments and confirmed events own usage
     local callback = B.filters.CHAT_MSG_SAY[1]
     local baseline = E:Stats(sample.name); local sent, seen = baseline.sent, baseline.seen
     local result = tuple(callback(chat, "CHAT_MSG_SAY", sample.name, "Alice", nil, "last", nil))
-    equal(result.n, 6); equal(result[1], false); assert(result[2]:find("|T", 1, true)); assert(result[2]:find("|Haddon:ForeverEmotes:", 1, true))
+    equal(result.n, 6); equal(result[1], false); assert(result[2]:find("|T", 1, true)); assert(result[2]:find("|Haddon:TwitchEmotesFR:", 1, true))
     equal(result[3], "Alice"); equal(result[4], nil); equal(result[5], "last"); equal(result[6], nil)
     callback(chat, "CHAT_MSG_SAY", sample.name); equal(E:Stats(sample.name).seen, seen)
     chatMessage("CHAT_MSG_SAY", sample.name, 7001, "Player-other"); equal(E:Stats(sample.name).seen, seen + 1)
@@ -296,7 +295,7 @@ test("registered texture dimensions match real TGA and BLP files and retain aspe
         assert(type(entry.source) == "string" and entry.source ~= "", "source provenance missing")
         assert(type(entry.creator) == "string", "creator metadata missing")
         if not checked[entry.path] then
-            local relative = assert(entry.path:match("^Interface\\AddOns\\TwitchEmotes\\(.+)$")):gsub("\\", "/")
+            local relative = assert(entry.path:match("^Interface\\AddOns\\TwitchEmotesFR\\(.+)$")):gsub("\\", "/")
             local file = assert(io.open(mediaDirectory .. "/" .. relative, "rb")); local header = file:read(20); file:close()
             assert(header and #header == 20)
             local function number(offset, bytes)
